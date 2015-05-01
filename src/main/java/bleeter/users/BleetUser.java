@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import bleeter.bleets.Bleet;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Document
@@ -17,6 +19,8 @@ public class BleetUser {
 	private String email;
 	private String avatar;
 	private List<String> favorites;
+	private List<Bleet> bleets;
+	private List<String> authorities;
 	
 	@JsonIgnore
 	private String password;
@@ -24,7 +28,7 @@ public class BleetUser {
 
 	public BleetUser(String id, String firstName, String lastName,
 			String username, String email, String avatar,
-			List<String> favorites, String password) {
+			List<String> favorites, List<String> authorities, List<Bleet> bleets, String password) {
 		super();
 		this.id = id;
 		this.firstName = firstName;
@@ -33,6 +37,8 @@ public class BleetUser {
 		this.email = email;
 		this.avatar = avatar;
 		this.favorites = favorites;
+		this.authorities = authorities;
+		this.bleets = bleets;
 		this.password = password;
 	}
 
@@ -90,6 +96,19 @@ public class BleetUser {
 
 	public void setFavorites(List<String> favorites) {
 		this.favorites = favorites;
+	}
+	public List<String> getAuthorities() {
+		return authorities;
+	}
+	public void setAuthorities(List<String> authorities) {
+		this.authorities = authorities;
+	}
+	public List<Bleet> getBleets() {
+		return bleets;
+	}
+
+	public void setBleets(List<Bleet> bleets) {
+		this.bleets = bleets;
 	}
 
 	public String getPassword() {
