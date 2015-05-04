@@ -1,6 +1,5 @@
 package bleeter.bleets;
 
-import java.awt.Image;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +33,14 @@ public class BleetController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "", method = RequestMethod.POST)
 	@ResponseBody
-	public BleetUser createUser(@RequestParam String username, @RequestParam String password) {
-		return userServices.createUser(username, password);
+	public BleetUser createUser(@RequestParam String username,
+			@RequestParam String password,
+			@RequestParam String firstname,
+			@RequestParam String lastname,
+			@RequestParam String email) {
+		BleetUser newUser = new BleetUser(null, firstname, lastname,
+				username, email, null, null, null, null, password);
+		return userServices.createUser(newUser);
 	}
 
 	@Secured("ROLE_ADMIN")
@@ -46,29 +51,29 @@ public class BleetController {
 	}
 
 	@Secured("ROLE_USER")
-	@RequestMapping("/{uid}/images/{iid}")
+	@RequestMapping("/{uid}/images/{bid}")
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")		
-	public Image getImage(@PathVariable String uid, @PathVariable String iid) {
-		return userServices.findByImageId(uid, iid);
+	public Bleet getBleet(@PathVariable String uid, @PathVariable String bid) {
+		return userServices.findByBleetId(uid, bid);
 	}
 	
 	@Secured("ROLE_USER")
-	@RequestMapping(value = "/{uid}/images/{iid}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{uid}/bleets/{bid}", method = RequestMethod.DELETE)
 	@ResponseBody
 	@PreAuthorize("principal.id == #uid")		
-	public BleetUser deleteImage(@PathVariable String uid, @PathVariable String iid) {	
-		return userServices.deleteImage(uid, iid);
+	public List<Bleet> deleteBleet(@PathVariable String uid, @PathVariable String bid) {	
+		return userServices.deleteBleet(uid, bid);
 	}	
 	
 	@Secured("ROLE_USER")
-	@RequestMapping(value = "/{uid}/images", method = RequestMethod.POST)
+	@RequestMapping(value = "/{uid}/bleets", method = RequestMethod.POST)
 	@ResponseBody
 	@PostAuthorize(value = "principal.id == #uid")		
-	public BleetUser createImage(@PathVariable String uid,
+	public List<Bleet> createBleet(@PathVariable String uid,
 			@RequestParam String url,
 			@RequestParam String comment) {
-		return userServices.addImage(uid, url, comment);
+		return userServices.addBleet(uid, url, comment);
 	}
 	
 }

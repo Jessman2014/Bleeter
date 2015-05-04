@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import bleeter.bleets.Bleet;
+
 public class UserServices implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
@@ -23,10 +25,9 @@ public class UserServices implements UserDetailsService {
 		return userRepository.findByUsername(username);
 	}
 
-	public BleetUser createUser(String username, String password) {
+	public BleetUser createUser(BleetUser newUser) {
 		List<String> authorities = new ArrayList<String>();
 		authorities.add("ROLE_USER");
-		BleetUser newUser = new BleetUser((String) null, username, password, authorities, new ArrayList<Image>());
 		return userRepository.insert(newUser);
 	}
 
@@ -54,6 +55,16 @@ public class UserServices implements UserDetailsService {
 			result.add(new SimpleGrantedAuthority(auth));
 		}
 		return result;
+	}
+
+	public List<Bleet> deleteBleet(String uid, String bid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public List<Bleet> addBleet(String uid, String url, String comment) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 
