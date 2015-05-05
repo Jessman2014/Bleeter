@@ -31,10 +31,6 @@ public class UserServices implements UserDetailsService {
 		return userRepository.insert(newUser);
 	}
 
-	public Bleet findByBleetId(String uid, String bid) {
-		return userRepository.findByBleetId(uid, bid);
-	}
-	
 	public List<BleetUser> findAll() {
 		return userRepository.findAll();
 	}
@@ -56,15 +52,66 @@ public class UserServices implements UserDetailsService {
 		}
 		return result;
 	}
+	
+	public List<Bleet> addBleet(String uid, Bleet newBleet) {
+		BleetUser user = userRepository.findByUsername(uid);
+		List<Bleet> bleets = user.getBleets();
+		if (bleets == null){
+			bleets = new ArrayList<Bleet>();
+		}
+		bleets.add(newBleet);
+		user.setBleets(bleets);
+		userRepository.update(user);
+		return bleets;
+	}
 
 	public List<Bleet> deleteBleet(String uid, String bid) {
-		// TODO Auto-generated method stub
-		return null;
+		BleetUser user = userRepository.findByUsername(uid);
+		List<Bleet> bleets = user.getBleets();
+		if (bleets != null){
+			for (Bleet bleet : bleets) {
+				if (bleet.getId().equals(bid)) {
+					bleets.remove(bleet);
+					break;
+				}
+			}
+		}
+		userRepository.update(user);
+		return bleets;
 	}
 
-	public List<Bleet> addBleet(String uid, String url, String comment) {
-		// TODO Auto-generated method stub
-		return null;
+	public Bleet findByBleetId(String uid, String bid) {
+		return userRepository.findByBleetId(uid, bid);
 	}
+
+	public List<Bleet> updateBleet(String uid, String bid, String bleet,
+			Boolean privatecomment) {
+		Bleet b = userRepository.findByBleetId(uid, bid);
+		b.setBleet(bleet);
+		b.setPrivateComment(privatecomment);
+		deleteBleet(uid, bid);
+		return addBleet(uid, b);
+	}
+
+	public List<Bleet> findAllBleets() {
+		List<BleetUser> users = userRepository.findAll();
+		List<Bleet> bleets = new ArrayList<Bleet>();
+		for (BleetUser user : users) {
+			bleets.addAll(user.getBleets());
+		}
+		return bleets;
+	}
+
+	public List<Bleet> findUsersBleets(String uid) {
+		return userRepository.findByUsername(uid)
+				.getBleets();
+	}
+
+	public BleetUser updateUser(BleetUser user) {
+		return userRepository.update(user);
+	}
+	
+	
+
 }
 

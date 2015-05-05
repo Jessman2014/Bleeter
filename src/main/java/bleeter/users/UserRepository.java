@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.repository.Query;
 import bleeter.bleets.Bleet;
 
 public interface UserRepository  extends MongoRepository<BleetUser, String>, UpdateableUserRepository{
-	@Query(value= "{ 'id' : ?0, 'images.id' : ?1 }" )
+	@Query(value= "{ 'id' : ?0, 'bleets.id' : ?1 }" )
 	public Bleet findByBleetId(String uid, String bid);
 	public BleetUser findByUsername(String username);
 

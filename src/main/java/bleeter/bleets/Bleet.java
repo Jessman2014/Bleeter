@@ -14,17 +14,8 @@ public class Bleet {
 	private boolean blocked;
 	private String sentiment;
 	private float confidence;
-	
-	public Bleet(String id, String bleet, Date timestamp, boolean blocked,
-			String sentiment, float confidence) {
-		super();
-		this.id = id;
-		this.bleet = bleet;
-		this.timestamp = timestamp;
-		this.blocked = blocked;
-		this.sentiment = sentiment;
-		this.confidence = confidence;
-	}
+	private boolean privateComment;
+	private String uid;
 	
 	public String getId() {
 		return id;
@@ -61,5 +52,85 @@ public class Bleet {
 	}
 	public void setConfidence(float confidence) {
 		this.confidence = confidence;
+	}
+
+	public boolean isPrivateComment() {
+		return privateComment;
+	}
+
+	public void setPrivateComment(boolean privateComment) {
+		this.privateComment = privateComment;
+	}
+	
+	public String getUid() {
+		return uid;
+	}
+	public void setUid(String uid) {
+		this.uid = uid;
+	}
+	private Bleet (Builder b) {
+		this.id = b.id;
+		this.bleet = b.bleet;
+		this.timestamp = b.timestamp;
+		this.blocked = b.blocked;
+		this.sentiment = b.sentiment;
+		this.confidence = b.confidence;
+		this.privateComment = b.privateComment;
+		this.uid = b.uid;
+	}
+
+	public static class Builder {
+		private String id;
+		private String bleet;
+		private Date timestamp;
+		private boolean blocked;
+		private String sentiment;
+		private float confidence;
+		private boolean privateComment;
+		private String uid;
+		
+		public Builder id(String id) {
+			this.id = id;
+			return this;
+		}
+		
+		public Builder bleet(String bleet) {
+			this.bleet = bleet;
+			return this;
+		}
+		
+		public Builder timestamp(Date timestamp) {
+			this.timestamp = timestamp;
+			return this;
+		}
+		
+		public Builder blocked(boolean blocked) {
+			this.blocked = blocked;
+			return this;
+		}
+		
+		public Builder sentiment(String sentiment) {
+			this.sentiment = sentiment;
+			return this;
+		}
+		
+		public Builder confidence(float confidence) {
+			this.confidence = confidence;
+			return this;
+		}
+		
+		public Builder privateComment(boolean privateComment) {
+			this.privateComment = privateComment;
+			return this;
+		}
+		
+		public Builder uid(String uid) {
+			this.uid = uid;
+			return this;
+		}
+		
+		public Bleet build() {
+			return new Bleet(this);
+		}
 	}
 }
