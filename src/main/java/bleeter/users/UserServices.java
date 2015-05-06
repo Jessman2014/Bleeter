@@ -4,20 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import bleeter.bleets.Bleet;
 
+@Service
 public class UserServices implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
 
-	public BleetUser findById(String uid) {
+	public BleetUser findById(String uid, String order) {
 		return userRepository.findOne(uid);
 	}
 
@@ -31,8 +35,8 @@ public class UserServices implements UserDetailsService {
 		return userRepository.insert(newUser);
 	}
 
-	public List<BleetUser> findAll() {
-		return userRepository.findAll();
+	public Page<BleetUser> findAll(int min, int max) {
+		return userRepository.findAll(new PageRequest(min, max));
 	}
 	
 	@Override
@@ -109,6 +113,16 @@ public class UserServices implements UserDetailsService {
 
 	public BleetUser updateUser(BleetUser user) {
 		return userRepository.update(user);
+	}
+
+	public BleetUser makeAdmin(String uid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public BleetUser changeBlock(String bid, Boolean block) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

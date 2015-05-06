@@ -1,9 +1,9 @@
 package bleeter.bleets;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,7 +18,6 @@ import bleeter.users.BleetUser;
 import bleeter.users.UserServices;
 
 @Controller
-@RequestMapping("/users")
 public class BleetController {
 	@Autowired
 	private UserServices userServices;
@@ -29,7 +28,7 @@ public class BleetController {
 		return userServices.findAllBleets();
 	}
 	
-	@RequestMapping(value = "/{uid}", method = RequestMethod.PUT)
+	@RequestMapping(value = "users/{uid}", method = RequestMethod.PUT)
 	@ResponseBody
 	@PostAuthorize(value = "principal.id == #uid")
 	public BleetUser updateUser(@PathVariable String uid, @RequestParam String firstname,
@@ -43,7 +42,7 @@ public class BleetController {
 		return userServices.updateUser(user);
 	}
 	
-	@RequestMapping("/{uid}")
+	@RequestMapping("users/{uid}")
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")		
 	public BleetUser getUser(@PathVariable String uid, 
@@ -52,7 +51,7 @@ public class BleetController {
 	}
 	
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "/{uid}/authorities", method = RequestMethod.PUT)
+	@RequestMapping(value = "users/{uid}/authorities", method = RequestMethod.PUT)
 	@ResponseBody
 	public BleetUser makeAdmin(@PathVariable String uid) {
 		return userServices.makeAdmin(uid);
@@ -66,8 +65,8 @@ public class BleetController {
 		return userServices.changeBlock(bid, block);
 	}
 	
-	@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "/{uid}/authorities", method = RequestMethod.DELETE)
+	/*@Secured("ROLE_ADMIN")
+	@RequestMapping(value = "users/{uid}/authorities", method = RequestMethod.DELETE)
 	@ResponseBody
 	public BleetUser removeAdmin(@PathVariable String uid) {
 		return userServices.removeAdmin(uid);
@@ -79,10 +78,10 @@ public class BleetController {
 	public List<Bleet> searchBleets(@RequestParam(required=false, defaultValue="") String username,
 			@RequestParam(required=false, defaultValue="01/01/2999") Date timestamp) {
 		return userServices.searchBleets(username, timestamp);
-	}
+	}*/
 
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "", method = RequestMethod.POST)
+	@RequestMapping(value = "users", method = RequestMethod.POST)
 	@ResponseBody
 	public BleetUser createUser(@RequestParam String username,
 			@RequestParam String password,
@@ -95,14 +94,15 @@ public class BleetController {
 	}
 
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@RequestMapping(value = "users/{page}", method = RequestMethod.GET)
 	@ResponseBody
-	public List<BleetUser> getUsers() {
-		return userServices.findAll();
+	public Page<BleetUser> getUsers(@PathVariable Integer page
+			) {
+		return userServices.findAll(page*2, page*2+9);
 	}
 
 	@Secured("ROLE_USER")
-	@RequestMapping("/{uid}/bleets")
+	@RequestMapping("users/{uid}/bleets")
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")
 	public List<Bleet> getUsersBleets(@PathVariable String uid) {
@@ -110,7 +110,7 @@ public class BleetController {
 	}
 	
 	@Secured("ROLE_USER")
-	@RequestMapping("/{uid}/bleets/{bid}")
+	@RequestMapping("users/{uid}/bleets/{bid}")
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")		
 	public Bleet getBleet(@PathVariable String uid, @PathVariable String bid) {
@@ -118,7 +118,7 @@ public class BleetController {
 	}
 	
 	@Secured("ROLE_USER")
-	@RequestMapping(value = "/{uid}/bleets/{bid}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "users/{uid}/bleets/{bid}", method = RequestMethod.DELETE)
 	@ResponseBody
 	@PreAuthorize("principal.id == #uid")		
 	public List<Bleet> deleteBleet(@PathVariable String uid, @PathVariable String bid) {	
@@ -126,7 +126,7 @@ public class BleetController {
 	}	
 	
 	@Secured("ROLE_USER")
-	@RequestMapping(value = "/{uid}/bleets", method = RequestMethod.POST)
+	@RequestMapping(value = "users/{uid}/bleets", method = RequestMethod.POST)
 	@ResponseBody
 	@PostAuthorize(value = "principal.id == #uid")		
 	public List<Bleet> createBleet(@PathVariable String uid,
@@ -138,7 +138,7 @@ public class BleetController {
 	}
 	
 	@Secured("ROLE_USER")
-	@RequestMapping(value = "/{uid}/bleets/{bid}", method = RequestMethod.PUT)
+	@RequestMapping(value = "users/{uid}/bleets/{bid}", method = RequestMethod.PUT)
 	@ResponseBody
 	@PostAuthorize(value = "principal.id == #uid")
 	public List<Bleet> updateBleet(@PathVariable String uid, @PathVariable String bid,

@@ -26,33 +26,51 @@
 				type : 'get',
 				success : function(data) {				
 					user = data;
-					updateImages();
+					updateBleets();
 				},
-				failure: function() {
-						
+				failure: function(err) {
+					console.log("There is an error with retrieving user: " + err);
 				}
 			});	
 		});
 		
-		addImage = function() {		
-			comment = $('#comment').val();
-			url = $('#imageUrl').val();
+		addBleet = function() {		
+			bleet = $('#bleet').val();
+			privateCommment = $('#privateComment').val();
 			clearForm();			
 			$.ajax({
-				url : "users/" + userid + "/images",
+				url : "users/" + userid + "/bleets",
 				dataType : 'json',
 				type : 'post',
-				data : { comment : comment, url : url },
+				data : { bleet : bleet, privateComment : privateComment },
 				success : function(data) {				
 					user = data;
-					updateImages();
+					updateBleets();
 				},
-				failure: function() {
-						
+				failure: function(err) {
+					console.log("There is an error with adding a bleet: " + err);
 				}
 			});					
 		}
 		
+		updateBleet = function(id) {		
+			bleet = $('#bleet').val();
+			privateCommment = $('#privateComment').val();
+			clearForm();			
+			$.ajax({
+				url : "users/" + userid + "/bleets" + id,
+				dataType : 'json',
+				type : 'put',
+				data : { bleet : bleet, privateComment : privateComment },
+				success : function(data) {				
+					user = data;
+					updateBleets();
+				},
+				failure: function(err) {
+					console.log("There is an error with updating a bleet: " + err);
+				}
+			});					
+		}
 
 		addAvatar = function() {
 			imageFile = document.getElementById('avatar').files[0];
@@ -80,31 +98,31 @@
 						
 		}
 
-		deleteImage = function(id) {
+		deleteBleet = function(id) {
 			clearForm();
 			$.ajax({
-				url : "users/" + userid + "/images/" + id,
+				url : "users/" + userid + "/bleets/" + id,
 				dataType : 'json',
 				type : 'delete',
 				success : function(data) {
 					user = data;
-					updateImages();
+					updateBleets();
 				},
-				failure : function() {
-
+				failure : function(err) {
+					console.log("There is an error with adding a bleet: " + err);
 				}
 			});
 		}
 
 		clearForm = function() {
-			$('#comment').val("");
-			$('#imageUrl').val("");
+			$('#bleet').val("");
+			$('#privateComment').val("");
 		}
 
-		updateImages = function() {
-			var imageList = $('#imageList');
+		updateBleets = function() {
+			var imageList = $('#bleetList');
 			imageList.empty();
-			$(user.images)
+			$(user.bleets)
 					.each(
 							function(key, val) {
 								var imageDiv = $('<div class="media">');
@@ -133,7 +151,7 @@
 							class="icon-bar"></span> <span class="icon-bar"></span> <span
 							class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand" href="#">Imaginary</a>
+					<a class="navbar-brand" href="#">Bleeter</a>
 				</div>
 
 				<div id="navbar" class="navbar-collapse collapse">
@@ -158,14 +176,14 @@
 		</div>
 		
 		<div class="page-header">
-			<h2>Imaginarium</h2>
+			<h2>Bleeter</h2>
 		</div>		
 		
 
 		<div class="row">
-			Description: <input type="text" id="comment"> Url: 
-			<input type="url" id="imageUrl">
-			<div class="btn btn-sm btn-primary" onclick="addImage()">Add image</div>
+			Bleet description: <input type="text" id="bleet"> Make comment private?: 
+			<input type="checkbox" id="privateComment">
+			<div class="btn btn-sm btn-primary" onclick="addImage()">Add bleet</div>
 
 		</div>
 
