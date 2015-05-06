@@ -26,7 +26,7 @@ public class AvatarServices {
 	
 	public String getAvatarFile(String uid) {
 		File root = FileSystemView.getFileSystemView().getRoots()[0];
-		return root.getAbsolutePath() + File.pathSeparator + "tmp" + File.pathSeparator + "bleeter" + File.pathSeparator + uid;
+		return root.getAbsolutePath() + File.separator + "tmp" + File.separator + "bleeter" + File.separator + uid;
 	}
 	
 	

@@ -7,139 +7,12 @@
 <head>
 <title>Users</title>
 	<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
+	<link href="<spring:url value="/bleets.css"/>" rel="stylesheet">	
 	<script src="https://code.jquery.com/jquery-2.1.3.js"></script>	
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-	<style>
-		.row { margin-bottom: 1em; } 
-		img.thumb { max-width: 120px; max-height: 100px; border : 1px solid gray;} 
-		.media { border-radius: 5px; padding: .5em; margin-bottom: 1em; background-color: rgb(250,250,250);}
-		.avatar-circle { border-radius: 50%; display : inline-block; width:150px; height: 150px; overflow: hidden; margin-right: 3em;}
-		.avatar-circle img { display: block; width: 100%; }	
-	</style>	
-	<script>
-		user = {};
-		$(document).ready(function() {
-			userid = $('#userid').html();
-			$.ajax({
-				url : "users/" + userid,
-				dataType : 'json',
-				type : 'get',
-				success : function(data) {				
-					user = data;
-					updateBleets();
-				},
-				failure: function(err) {
-					console.log("There is an error with retrieving user: " + err);
-				}
-			});	
-		});
-		
-		addBleet = function() {		
-			bleet = $('#bleet').val();
-			privateCommment = $('#privateComment').val();
-			clearForm();			
-			$.ajax({
-				url : "users/" + userid + "/bleets",
-				dataType : 'json',
-				type : 'post',
-				data : { bleet : bleet, privateComment : privateComment },
-				success : function(data) {				
-					user = data;
-					updateBleets();
-				},
-				failure: function(err) {
-					console.log("There is an error with adding a bleet: " + err);
-				}
-			});					
-		}
-		
-		updateBleet = function(id) {		
-			bleet = $('#bleet').val();
-			privateCommment = $('#privateComment').val();
-			clearForm();			
-			$.ajax({
-				url : "users/" + userid + "/bleets" + id,
-				dataType : 'json',
-				type : 'put',
-				data : { bleet : bleet, privateComment : privateComment },
-				success : function(data) {				
-					user = data;
-					updateBleets();
-				},
-				failure: function(err) {
-					console.log("There is an error with updating a bleet: " + err);
-				}
-			});					
-		}
-
-		addAvatar = function() {
-			imageFile = document.getElementById('avatar').files[0];
-			var data = new FormData();
-			data.append('avatar', imageFile);
-			$('#avatar').replaceWith( $('#avatar').clone(true) );
-			
-			$.ajax({
-				url : 'users/' + userid + '/avatar',
-				type : 'POST',
-				data : data,
-				cache : false,
-				dataType : 'text',
-				processData : false, 
-				contentType : false, 
-				success : function(data, textStatus, jqXHR) {
-					d = new Date();
-					var src = $("#avatarImage").attr("src");
-					$('#avatarImage').attr('src', src + '?' + d.getTime());
-				},
-				error : function(jqXHR, textStatus, errorThrown) {
-					console.log('ERRORS: ' + textStatus);
-				}
-			});
-						
-		}
-
-		deleteBleet = function(id) {
-			clearForm();
-			$.ajax({
-				url : "users/" + userid + "/bleets/" + id,
-				dataType : 'json',
-				type : 'delete',
-				success : function(data) {
-					user = data;
-					updateBleets();
-				},
-				failure : function(err) {
-					console.log("There is an error with adding a bleet: " + err);
-				}
-			});
-		}
-
-		clearForm = function() {
-			$('#bleet').val("");
-			$('#privateComment').val("");
-		}
-
-		updateBleets = function() {
-			var imageList = $('#bleetList');
-			imageList.empty();
-			$(user.bleets)
-					.each(
-							function(key, val) {
-								var imageDiv = $('<div class="media">');
-								imageDiv
-										.append('<div class="media-left media-top"><a href="' + val.url + '"><img class="thumb media-object" src="' + val.url + '"></a></div>');
-								imageDiv
-										.append('<div class="media-body">'
-												+ val.comment
-												+ '<div onclick="deleteImage(\''
-												+ val.id
-												+ '\')" class="pull-right btn btn-xs btn-warning">&times;</div></div>');
-								imageDiv.appendTo(imageList);
-							});
-		}
-	</script>
+	<script src="<spring:url value="/bleets.js"/>"></script>
 </head>
-<body background="http://www.munciehighstreet.org/wp-content/uploads/2014/05/website-background-wincustomize-explore-clouds-284048.jpg">
+<body background="http://img.wallpaperstock.net:81/vista-grass-2-wallpapers_2289_1920x1200.jpg">
 	<div class="container">
 		<nav class="navbar navbar-default">
 			<div class="container-fluid">
@@ -183,7 +56,7 @@
 		<div class="row">
 			Bleet description: <input type="text" id="bleet"> Make comment private?: 
 			<input type="checkbox" id="privateComment">
-			<div class="btn btn-sm btn-primary" onclick="addImage()">Add bleet</div>
+			<div class="btn btn-sm btn-primary" onclick="addBleet()">Add bleet</div>
 
 		</div>
 
