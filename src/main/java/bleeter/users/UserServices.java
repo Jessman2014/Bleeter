@@ -21,7 +21,7 @@ public class UserServices implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
 
-	public BleetUser findById(String uid, String order) {
+	public BleetUser findById(String uid) {
 		return userRepository.findOne(uid);
 	}
 

@@ -30,7 +30,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/users").authenticated()
 		.and()
 			.formLogin()
-				.loginPage("/login")
+				.loginPage("/login.jsp")
 				.loginProcessingUrl("/login")
 				.defaultSuccessUrl("/home")		
 				.failureUrl("/login.jsp?error")
@@ -39,7 +39,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.permitAll()
 		.and()
 			.logout()
-				.logoutSuccessUrl("/login?logout");
+				.logoutUrl("/logout")
+				.logoutSuccessUrl("/login.jsp?logout");
 		
 		//http.headers()
 		//	.addHeaderWriter(new CacheControlHeadersWriter());

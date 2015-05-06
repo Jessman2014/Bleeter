@@ -139,7 +139,7 @@
 		}
 	</script>
 </head>
-<body>
+<body background="http://www.munciehighstreet.org/wp-content/uploads/2014/05/website-background-wincustomize-explore-clouds-284048.jpg">
 	<div class="container">
 		<nav class="navbar navbar-default">
 			<div class="container-fluid">

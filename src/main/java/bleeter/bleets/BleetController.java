@@ -45,9 +45,8 @@ public class BleetController {
 	@RequestMapping("users/{uid}")
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")		
-	public BleetUser getUser(@PathVariable String uid, 
-			@RequestParam(required=false, defaultValue="username") String order) {
-		return userServices.findById(uid, order);
+	public BleetUser getUser(@PathVariable String uid) {
+		return userServices.findById(uid);
 	}
 	
 	@Secured("ROLE_ADMIN")

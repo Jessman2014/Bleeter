@@ -3,6 +3,7 @@ package bleeter.bleets;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
@@ -17,6 +18,20 @@ public class Bleet {
 	private boolean privateComment;
 	private String uid;
 	
+	@PersistenceConstructor
+	public Bleet(String id, String bleet, Date timestamp, boolean blocked,
+			String sentiment, float confidence, boolean privateComment,
+			String uid) {
+		super();
+		this.id = id;
+		this.bleet = bleet;
+		this.timestamp = timestamp;
+		this.blocked = blocked;
+		this.sentiment = sentiment;
+		this.confidence = confidence;
+		this.privateComment = privateComment;
+		this.uid = uid;
+	}
 	public String getId() {
 		return id;
 	}

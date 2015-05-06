@@ -1,9 +1,14 @@
 package bleeter.users;
 
 import java.util.List;
+
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import bleeter.bleets.Bleet;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Document
@@ -12,6 +17,7 @@ public class BleetUser {
 	private String id;
 	private String firstName;
 	private String lastName;
+	@Indexed
 	private String username;
 	private String email;
 	private String avatar;
@@ -21,6 +27,24 @@ public class BleetUser {
 	
 	@JsonIgnore
 	private String password;
+	
+	@PersistenceConstructor
+	public BleetUser(String id, String firstName, String lastName,
+			String username, String email, String avatar,
+			List<String> favorites, List<Bleet> bleets,
+			List<String> authorities, String password) {
+		super();
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.username = username;
+		this.email = email;
+		this.avatar = avatar;
+		this.favorites = favorites;
+		this.bleets = bleets;
+		this.authorities = authorities;
+		this.password = password;
+	}
 	
 	public String getId() {
 		return id;
