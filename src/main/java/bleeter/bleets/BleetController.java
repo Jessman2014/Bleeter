@@ -63,7 +63,7 @@ public class BleetController {
 	@ResponseBody
 	@PreAuthorize("principal.id == #uid")		
 	public List<Bleet> deleteBleet(@PathVariable String uid, @PathVariable String bid) {	
-		return userServices.deleteBleet(bid);
+		return userServices.deleteBleet(uid, bid);
 	}	
 	
 	@Secured("ROLE_USER")

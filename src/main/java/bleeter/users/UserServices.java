@@ -57,8 +57,9 @@ public class UserServices implements UserDetailsService {
 		return result;
 	}
 
-	public List<Bleet> deleteBleet(String bid) {
-		userRepository.
+	public List<Bleet> deleteBleet(String uid, String bid) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public List<Bleet> addBleet(String uid, String url, String comment) {
