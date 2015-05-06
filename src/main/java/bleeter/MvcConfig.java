@@ -9,8 +9,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-@EnableWebMvc
 @Configuration
+@EnableWebMvc
 @ComponentScan(basePackages = { "" })
 public class MvcConfig extends WebMvcConfigurerAdapter {
  

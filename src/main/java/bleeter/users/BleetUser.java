@@ -1,12 +1,9 @@
 package bleeter.users;
 
 import java.util.List;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
 import bleeter.bleets.Bleet;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Document
@@ -24,24 +21,7 @@ public class BleetUser {
 	
 	@JsonIgnore
 	private String password;
-
-
-	public BleetUser(String id, String firstName, String lastName,
-			String username, String email, String avatar,
-			List<String> favorites, List<String> authorities, List<Bleet> bleets, String password) {
-		super();
-		this.id = id;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.username = username;
-		this.email = email;
-		this.avatar = avatar;
-		this.favorites = favorites;
-		this.authorities = authorities;
-		this.bleets = bleets;
-		this.password = password;
-	}
-
+	
 	public String getId() {
 		return id;
 	}
@@ -119,5 +99,83 @@ public class BleetUser {
 		this.password = password;
 	}
 	
-	
+	private BleetUser(Builder b) {
+		this.id = b.id;
+		this.firstName = b.firstName;
+		this.lastName = b.lastName;
+		this.username = b.username;
+		this.email = b.email;
+		this.avatar = b.avatar;
+		this.favorites = b.favorites;
+		this.bleets = b.bleets;
+		this.authorities = b.authorities;
+		this.password = b.password;
+	}
+
+	public static class Builder {
+		private String id;
+		private String firstName;
+		private String lastName;
+		private String username;
+		private String email;
+		private String avatar;
+		private List<String> favorites;
+		private List<Bleet> bleets;
+		private List<String> authorities;
+		private String password;
+		
+		public Builder id(String id) {
+			this.id = id;
+			return this;
+		}
+		
+		public Builder firstName(String firstName) {
+			this.firstName = firstName;
+			return this;
+		}
+		
+		public Builder lastName(String lastName) {
+			this.lastName = lastName;
+			return this;
+		}
+		
+		public Builder username(String username) {
+			this.username = username;
+			return this;
+		}
+		
+		public Builder email(String email) {
+			this.email = email;
+			return this;
+		}
+		
+		public Builder avatar(String avatar) {
+			this.avatar = avatar;
+			return this;
+		}
+		
+		public Builder favorites(List<String> favorites) {
+			this.favorites = favorites;
+			return this;
+		}
+		
+		public Builder bleets(List<Bleet> bleets){
+			this.bleets = bleets;
+			return this;
+		}
+		
+		public Builder authorities(List<String> authorities){
+			this.authorities = authorities;
+			return this;
+		}
+		
+		public Builder password(String password) {
+			this.password = password;
+			return this;
+		}
+		
+		public BleetUser build() {
+			return new BleetUser(this);
+		}
+	}
 }
