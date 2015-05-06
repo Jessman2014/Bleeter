@@ -132,7 +132,7 @@ public class BleetController {
 			@RequestParam String bleet,
 			@RequestParam Boolean privatecomment) {
 		Bleet newBleet = new Bleet.Builder().bleet(bleet).privateComment(privatecomment)
-				.uid(uid).build();
+				.uid(uid).sentiment("").confidence(0).build();
 		return userServices.addBleet(uid, newBleet);
 	}
 	

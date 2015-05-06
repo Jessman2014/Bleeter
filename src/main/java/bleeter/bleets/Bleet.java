@@ -14,7 +14,7 @@ public class Bleet {
 	private Date timestamp;
 	private boolean blocked;
 	private String sentiment;
-	private float confidence;
+	private double confidence;
 	private boolean privateComment;
 	private String uid;
 	
@@ -62,10 +62,10 @@ public class Bleet {
 	public void setSentiment(String sentiment) {
 		this.sentiment = sentiment;
 	}
-	public float getConfidence() {
+	public double getConfidence() {
 		return confidence;
 	}
-	public void setConfidence(float confidence) {
+	public void setConfidence(double confidence) {
 		this.confidence = confidence;
 	}
 
@@ -100,7 +100,7 @@ public class Bleet {
 		private Date timestamp;
 		private boolean blocked;
 		private String sentiment;
-		private float confidence;
+		private double confidence;
 		private boolean privateComment;
 		private String uid;
 		
@@ -129,7 +129,7 @@ public class Bleet {
 			return this;
 		}
 		
-		public Builder confidence(float confidence) {
+		public Builder confidence(double confidence) {
 			this.confidence = confidence;
 			return this;
 		}
