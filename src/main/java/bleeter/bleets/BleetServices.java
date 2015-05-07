@@ -60,8 +60,8 @@ public class BleetServices {
 		readSentiment(newBleet);
 		newBleet.setBleet(bleet);
 		newBleet.setPrivateComment(privatecomment);
-		bleetRepository.delete(bid);
-		return addBleet(uid, newBleet);
+		bleetRepository.save(newBleet);
+		return findBleets(uid, DEFAULT_PAGE, DEFAULT_SORT);
 	}
 	
 	private void readSentiment (Bleet bleet) {
@@ -105,6 +105,14 @@ public class BleetServices {
 		} catch (Exception e) {
 			System.out.println(e);
 		} 
+	}
+
+	public Page<Bleet> changeBlock(String bid, Integer page, Sort s,
+			Boolean block) {
+		Bleet newBleet = bleetRepository.findOne(bid);
+		newBleet.setBlocked(block);
+		bleetRepository.save(newBleet);
+		return findAllBleets(page, s);
 	}
 
 	
