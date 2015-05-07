@@ -12,6 +12,7 @@
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 	<script src="<spring:url value="/bleets.js"/>"></script>
 	<style>
+		body { background-repeat: no-repeat; background-color: #C6E2EE; }
 		.row { margin-bottom: 1em; } 
 		img.thumb { max-width: 120px; max-height: 100px; border : 1px solid gray;} 
 		.media { border-radius: 5px; padding: .5em; margin-bottom: 1em; background-color: rgb(250,250,250);}
@@ -20,37 +21,58 @@
 	</style>	
 	<script>
 	user = {};
+	bleets = {};
 	$(document).ready(function() {
 		userid = $('#userid').html();
+		getUser();
+		getBleets();
+	});
+	
+	getUser = function() {
 		$.ajax({
 			url : "users/" + userid,
 			dataType : 'json',
 			type : 'get',
 			success : function(data) {				
 				user = data;
-				updateBleets();
 			},
 			failure: function(err) {
 				console.log("There is an error with retrieving user: " + err);
 			}
 		});	
-	});
+	}
+	
+	getBleets = function() {
+		$.ajax({
+			url : "users/" + userid + "/bleets",
+			dataType : 'json',
+			type : 'get',
+			success : function(data) {
+				bleets = data;
+				updateBleets();
+			},
+			failure: function(jqXHR, textStatus, errorThrown) {
+				console.log("There is an error with adding a bleet: " + errorThrown);
+			}
+		});		
+	}
 
 	addBleet = function() {		
 		bleet = $('#bleet').val();
-		privateCommment = $('#privateComment').val();
-		clearForm();			
+		//checked = $('input:checked').length;
+		isPrivate = $('#privateComment').attr('checked') === "checked";
+		//clearForm();			
 		$.ajax({
 			url : "users/" + userid + "/bleets",
 			dataType : 'json',
 			type : 'post',
-			data : { bleet : bleet, privateComment : privateComment },
+			data : { bleet : bleet, privatecomment : isPrivate },
 			success : function(data) {				
-				user = data;
+				bleets = data;
 				updateBleets();
 			},
-			failure: function(err) {
-				console.log("There is an error with adding a bleet: " + err);
+			failure: function(jqXHR, textStatus, errorThrown) {
+				console.log("There is an error with adding a bleet: " + errorThrown);
 			}
 		});					
 	}
@@ -118,30 +140,23 @@
 
 	clearForm = function() {
 		$('#bleet').val("");
-		$('#privateComment').val("");
+		$('#privateComment').attr('checked', true);
 	}
 
 	updateBleets = function() {
-		var bleetList = $('#bleetList');
-		bleetList.empty();
-		$(user.bleets)
+		var bleetRows = $('tr ~ tr');
+		bleetRows.empty();
+		bleetTable = $('table');
+		$(bleets.content)
 				.each(
 						function(key, val) {
-							var bleetDiv = $('<div class="">');
-							bleetDiv
-									.append('<div class="media-left media-top"><a href="' + val.url + '"><img class="thumb media-object" src="' + val.url + '"></a></div>');
-							bleetDiv
-									.append('<div class="media-body">'
-											+ val.comment
-											+ '<div onclick="deletebleet(\''
-											+ val.id
-											+ '\')" class="pull-right btn btn-xs btn-warning">&times;</div></div>');
-							bleetDiv.appendTo(bleetList);
+							bleet = val;
+							bleetTable.append('<tr> <td>' + bleet.username + '</td><td>' + bleet.bleet + '</td><td>' + bleet.timestamp + '</td> </tr>');
 						});
 	}
 	</script>
 </head>
-<body background="http://img.wallpaperstock.net:81/vista-grass-2-wallpapers_2289_1920x1200.jpg">
+<body background="https://abs.twimg.com/images/themes/theme2/bg.gif">
 	<div class="container">
 		<nav class="navbar navbar-default">
 			<div class="container-fluid">
@@ -184,13 +199,14 @@
 
 		<div class="row">
 			Bleet description: <input type="text" id="bleet"> Make comment private?: 
-			<input type="checkbox" id="privateComment">
+			<input type="checkbox" id="privateComment" checked="checked">
 			<div class="btn btn-sm btn-primary" onclick="addBleet()">Add bleet</div>
 
 		</div>
 
-		<div id="imageList">
-		</div>
+		<table class="table table-hover" id="bleetTable">
+			<tr id="headerRow"> <th>Username</th> <th>Bleet</th> <th>Date</th> </tr>
+		</table>
 	</div>
 </body>
 </html>

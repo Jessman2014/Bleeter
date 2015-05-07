@@ -19,7 +19,6 @@ public class UserRepositoryImpl implements UpdateableUserRepository {
 		update.set("email", y.getEmail());
 		update.set("avatar", y.getAvatar());
 		update.set("favorites", y.getFavorites());
-		update.set("bleets", y.getBleets());	
 		update.set("authorities", y.getAuthorities());
 		//update.set("username", y.getUsername());
 		return update;

@@ -1,9 +1,11 @@
 package bleeter.bleets;
 
-import java.util.List;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,11 +23,30 @@ import bleeter.users.UserServices;
 public class BleetController {
 	@Autowired
 	private UserServices userServices;
+	@Autowired
+	private BleetServices bleetServices;
 
 	@RequestMapping("/bleets")
 	@ResponseBody
-	public List<Bleet> getBleets() {
-		return userServices.findAllBleets();
+	public Page<Bleet> getBleets(
+			@RequestParam(required = false, defaultValue="0") Integer page,
+			@RequestParam(required = false, defaultValue="username") String sort,
+			@RequestParam(required = false, defaultValue="ASC") String order) {
+		Sort s;
+		if (order.equals("ASC")) {
+			s = new Sort(Direction.ASC, sort);
+		}
+		else {
+			s = new Sort(Direction.DESC, sort);
+		}
+		return bleetServices.findAllBleets(page, s);
+	}
+	
+	@RequestMapping("users/{uid}")
+	@ResponseBody
+	@PreAuthorize(value = "principal.id == #uid")		
+	public BleetUser getUser(@PathVariable String uid) {
+		return userServices.findById(uid);
 	}
 	
 	@RequestMapping(value = "users/{uid}", method = RequestMethod.PUT)
@@ -42,12 +63,6 @@ public class BleetController {
 		return userServices.updateUser(user);
 	}
 	
-	@RequestMapping("users/{uid}")
-	@ResponseBody
-	@PreAuthorize(value = "principal.id == #uid")		
-	public BleetUser getUser(@PathVariable String uid) {
-		return userServices.findById(uid);
-	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "users/{uid}/authorities", method = RequestMethod.PUT)
@@ -93,10 +108,10 @@ public class BleetController {
 	}
 
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "users/{page}", method = RequestMethod.GET)
+	@RequestMapping(value = "users", method = RequestMethod.GET)
 	@ResponseBody
-	public Page<BleetUser> getUsers(@PathVariable Integer page
-			) {
+	public Page<BleetUser> getUsers(
+			@RequestParam(required = false, defaultValue="0") Integer page){			
 		return userServices.findAll(page*2, page*2+9);
 	}
 
@@ -104,45 +119,57 @@ public class BleetController {
 	@RequestMapping("users/{uid}/bleets")
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")
-	public List<Bleet> getUsersBleets(@PathVariable String uid) {
-		return userServices.findUsersBleets(uid);
+	public Page<Bleet> getUsersBleets(@PathVariable String uid,
+			@RequestParam(required = false, defaultValue="0") Integer page,
+			@RequestParam(required = false, defaultValue="username") String sort,
+			@RequestParam(required = false, defaultValue="ASC") String order) {
+		Sort s;
+		if (order.equals("ASC")) {
+			s = new Sort(Direction.ASC, sort);
+		}
+		else {
+			s = new Sort(Direction.DESC, sort);
+		}
+		return bleetServices.findBleets(uid, page, s);
 	}
 	
-	@Secured("ROLE_USER")
+	/*@Secured("ROLE_USER")
 	@RequestMapping("users/{uid}/bleets/{bid}")
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")		
 	public Bleet getBleet(@PathVariable String uid, @PathVariable String bid) {
-		return userServices.findByBleetId(uid, bid);
-	}
+		return bleetServices.findByBleetId(uid, bid);
+	}*/
 	
 	@Secured("ROLE_USER")
 	@RequestMapping(value = "users/{uid}/bleets/{bid}", method = RequestMethod.DELETE)
 	@ResponseBody
 	@PreAuthorize("principal.id == #uid")		
-	public List<Bleet> deleteBleet(@PathVariable String uid, @PathVariable String bid) {	
-		return userServices.deleteBleet(uid, bid);
+	public Page<Bleet> deleteBleet(@PathVariable String uid, @PathVariable String bid) {	
+		return bleetServices.deleteBleet(uid, bid);
 	}	
 	
 	@Secured("ROLE_USER")
 	@RequestMapping(value = "users/{uid}/bleets", method = RequestMethod.POST)
 	@ResponseBody
 	@PostAuthorize(value = "principal.id == #uid")		
-	public List<Bleet> createBleet(@PathVariable String uid,
+	public Page<Bleet> createBleet(@PathVariable String uid,
 			@RequestParam String bleet,
 			@RequestParam Boolean privatecomment) {
+		BleetUser user = userServices.findById(uid);
 		Bleet newBleet = new Bleet.Builder().bleet(bleet).privateComment(privatecomment)
-				.uid(uid).sentiment("").confidence(0).build();
-		return userServices.addBleet(uid, newBleet);
+				.uid(uid).username(user.getUsername()).sentiment("").timestamp(new Date())
+				.confidence(0).build();
+		return bleetServices.addBleet(uid, newBleet);
 	}
 	
 	@Secured("ROLE_USER")
 	@RequestMapping(value = "users/{uid}/bleets/{bid}", method = RequestMethod.PUT)
 	@ResponseBody
 	@PostAuthorize(value = "principal.id == #uid")
-	public List<Bleet> updateBleet(@PathVariable String uid, @PathVariable String bid,
+	public Page<Bleet> updateBleet(@PathVariable String uid, @PathVariable String bid,
 			@RequestParam String bleet, @RequestParam Boolean privatecomment){
-		return userServices.updateBleet(uid, bid, bleet, privatecomment);
+		return bleetServices.updateBleet(uid, bid, bleet, privatecomment);
 	}
 	
 }

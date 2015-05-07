@@ -7,8 +7,6 @@ import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import bleeter.bleets.Bleet;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Document
@@ -22,7 +20,6 @@ public class BleetUser {
 	private String email;
 	private String avatar;
 	private List<String> favorites;
-	private List<Bleet> bleets;
 	private List<String> authorities;
 	
 	@JsonIgnore
@@ -31,7 +28,7 @@ public class BleetUser {
 	@PersistenceConstructor
 	public BleetUser(String id, String firstName, String lastName,
 			String username, String email, String avatar,
-			List<String> favorites, List<Bleet> bleets,
+			List<String> favorites,
 			List<String> authorities, String password) {
 		super();
 		this.id = id;
@@ -41,7 +38,6 @@ public class BleetUser {
 		this.email = email;
 		this.avatar = avatar;
 		this.favorites = favorites;
-		this.bleets = bleets;
 		this.authorities = authorities;
 		this.password = password;
 	}
@@ -107,13 +103,6 @@ public class BleetUser {
 	public void setAuthorities(List<String> authorities) {
 		this.authorities = authorities;
 	}
-	public List<Bleet> getBleets() {
-		return bleets;
-	}
-
-	public void setBleets(List<Bleet> bleets) {
-		this.bleets = bleets;
-	}
 
 	public String getPassword() {
 		return password;
@@ -131,7 +120,6 @@ public class BleetUser {
 		this.email = b.email;
 		this.avatar = b.avatar;
 		this.favorites = b.favorites;
-		this.bleets = b.bleets;
 		this.authorities = b.authorities;
 		this.password = b.password;
 	}
@@ -144,7 +132,6 @@ public class BleetUser {
 		private String email;
 		private String avatar;
 		private List<String> favorites;
-		private List<Bleet> bleets;
 		private List<String> authorities;
 		private String password;
 		
@@ -180,11 +167,6 @@ public class BleetUser {
 		
 		public Builder favorites(List<String> favorites) {
 			this.favorites = favorites;
-			return this;
-		}
-		
-		public Builder bleets(List<Bleet> bleets){
-			this.bleets = bleets;
 			return this;
 		}
 		

@@ -5,23 +5,32 @@ import java.util.Date;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Document
 public class Bleet {
 	@Id
 	private String id;
 	private String bleet;
+	@DateTimeFormat(iso = ISO.DATE_TIME)
+	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd,HH:00", timezone="CT")
 	private Date timestamp;
 	private boolean blocked;
 	private String sentiment;
-	private double confidence;
+	private float confidence;
 	private boolean privateComment;
 	private String uid;
+	private String username;
 	
 	@PersistenceConstructor
-	public Bleet(String id, String bleet, Date timestamp, boolean blocked,
-			String sentiment, float confidence, boolean privateComment,
-			String uid) {
+	public Bleet(String id, String bleet, Date timestamp, 
+			boolean blocked,String sentiment, 
+			float confidence,
+			boolean privateComment, String uid, String username
+			) {
 		super();
 		this.id = id;
 		this.bleet = bleet;
@@ -31,6 +40,7 @@ public class Bleet {
 		this.confidence = confidence;
 		this.privateComment = privateComment;
 		this.uid = uid;
+		this.username = username;
 	}
 	public String getId() {
 		return id;
@@ -62,10 +72,10 @@ public class Bleet {
 	public void setSentiment(String sentiment) {
 		this.sentiment = sentiment;
 	}
-	public double getConfidence() {
+	public float getConfidence() {
 		return confidence;
 	}
-	public void setConfidence(double confidence) {
+	public void setConfidence(float confidence) {
 		this.confidence = confidence;
 	}
 
@@ -83,6 +93,12 @@ public class Bleet {
 	public void setUid(String uid) {
 		this.uid = uid;
 	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
 	private Bleet (Builder b) {
 		this.id = b.id;
 		this.bleet = b.bleet;
@@ -92,6 +108,7 @@ public class Bleet {
 		this.confidence = b.confidence;
 		this.privateComment = b.privateComment;
 		this.uid = b.uid;
+		this.username = b.username;
 	}
 
 	public static class Builder {
@@ -100,9 +117,10 @@ public class Bleet {
 		private Date timestamp;
 		private boolean blocked;
 		private String sentiment;
-		private double confidence;
+		private float confidence;
 		private boolean privateComment;
 		private String uid;
+		private String username;
 		
 		public Builder id(String id) {
 			this.id = id;
@@ -129,7 +147,7 @@ public class Bleet {
 			return this;
 		}
 		
-		public Builder confidence(double confidence) {
+		public Builder confidence(float confidence) {
 			this.confidence = confidence;
 			return this;
 		}
@@ -141,6 +159,11 @@ public class Bleet {
 		
 		public Builder uid(String uid) {
 			this.uid = uid;
+			return this;
+		}
+		
+		public Builder username(String username){
+			this.username = username;
 			return this;
 		}
 		
