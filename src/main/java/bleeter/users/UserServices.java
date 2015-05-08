@@ -34,6 +34,7 @@ public class UserServices implements UserDetailsService {
 	public Page<BleetUser> createUser(BleetUser newUser, int page) {
 		List<String> authorities = new ArrayList<String>();
 		authorities.add("ROLE_USER");
+		newUser.setAuthorities(authorities);
 		userRepository.insert(newUser);
 		return findAllUsers(page);
 	}

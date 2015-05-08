@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Implementation-Title: Bleeter
 Implementation-Version: 0.0.1-SNAPSHOT
-Built-By: Administrator
+Built-By: jdahirkanehl
 Implementation-Vendor-Id: com.dahirkanehl
 Build-Jdk: 1.8.0_31
 Created-By: Maven Integration for Eclipse

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,9 +33,9 @@ public class BleetController {
 	public Page<Bleet> getBleets(
 			@RequestParam(required = false, defaultValue="0") Integer page,
 			@RequestParam(required = false, defaultValue="username") String sort,
-			@RequestParam(required = false, defaultValue="ASC") String order) {
+			@RequestParam(required = false, defaultValue="asc") String order) {
 		Sort s;
-		if (order.equals("ASC")) {
+		if (order.equals("asc")) {
 			s = new Sort(Direction.ASC, sort);
 		}
 		else {
@@ -84,7 +85,7 @@ public class BleetController {
 			@RequestBody String sort,
 			@RequestBody String order) {
 		Sort s;
-		if (order.equals("ASC")) {
+		if (order.equals("asc")) {
 			s = new Sort(Direction.ASC, sort);
 		}
 		else {
@@ -93,13 +94,29 @@ public class BleetController {
 		return bleetServices.changeBlock(bid, page, s, block);
 	}
 	
-	/*@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "/bleets")
+	@RequestMapping(value = "/bleets/username")
 	@ResponseBody
-	public List<Bleet> searchBleets(@RequestParam(required=false, defaultValue="") String username,
-			@RequestParam(required=false, defaultValue="01/01/2999") Date timestamp) {
-		return userServices.searchBleets(username, timestamp);
-	}*/
+	public Page<Bleet> searchBleetsByUsername(@RequestParam String username,
+			@RequestParam(required=false, defaultValue="0") Integer page) {
+		return bleetServices.searchByUsername(page, username);
+	}
+	
+	@RequestMapping(value = "/bleets/timestamp")
+	@ResponseBody
+	public Page<Bleet> searchBleetsByTimestamp(
+			@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date timestamp,
+			@RequestParam(required=false, defaultValue="0") Integer page) {
+		return bleetServices.searchByTimestamp(page, timestamp);
+	}
+	
+	@RequestMapping(value = "/bleets/timestamps")
+	@ResponseBody
+	public Page<Bleet> searchBleetsByTimestamps(
+			@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date before,
+			@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date after,
+			@RequestParam(required=false, defaultValue="0") Integer page) {
+		return bleetServices.searchByTimestamp(page, before, after);
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "users", method = RequestMethod.POST)
@@ -130,9 +147,9 @@ public class BleetController {
 	public Page<Bleet> getUsersBleets(@PathVariable String uid,
 			@RequestParam(required = false, defaultValue="0") Integer page,
 			@RequestParam(required = false, defaultValue="username") String sort,
-			@RequestParam(required = false, defaultValue="ASC") String order) {
+			@RequestParam(required = false, defaultValue="asc") String order) {
 		Sort s;
-		if (order.equals("ASC")) {
+		if (order.equals("asc")) {
 			s = new Sort(Direction.ASC, sort);
 		}
 		else {

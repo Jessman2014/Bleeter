@@ -2,8 +2,8 @@ package bleeter.bleets;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Date;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -41,6 +41,21 @@ public class BleetServices {
 	public Page<Bleet> findAllBleets(int p, Sort s) {
 		Pageable page = new PageRequest(p, PAGE_SIZE, s);
 		return bleetRepository.findAll(page);
+	}
+	
+	public Page<Bleet> searchByUsername(int p, String username){
+		Pageable page = new PageRequest(p, PAGE_SIZE);
+		return bleetRepository.findByUsernameLike(username, page);
+	}
+	
+	public Page<Bleet> searchByTimestamp(int p, Date before, Date after){
+		Pageable page = new PageRequest(p, PAGE_SIZE);
+		return bleetRepository.findByTimestampBeforeAndTimestampAfter(before, after, page);
+	}
+	
+	public Page<Bleet> searchByTimestamp(int p, Date d){
+		Pageable page = new PageRequest(p, PAGE_SIZE);
+		return bleetRepository.findByTimestampLike(d, page);
 	}
 	
 	public Page<Bleet> addBleet(String uid, Bleet newBleet) {
@@ -83,12 +98,12 @@ public class BleetServices {
 		        .build();
 		
 		httppost.setConfig(requestConfig);
-		System.out.println(httppost);
+		/*System.out.println(httppost);
 		Header[] headers = httppost.getAllHeaders();
 		for (int i = 0; i < headers.length; i++) {
 			System.out.println(headers[i]);
 		}
-		System.out.println(httppost.getEntity());
+		System.out.println(httppost.getEntity());*/
 		CloseableHttpResponse response = httpclient.execute(httppost);		
 		
 		HttpEntity result = response.getEntity();
