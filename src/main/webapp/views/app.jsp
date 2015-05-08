@@ -26,11 +26,16 @@
 	order = "asc";
 	isAdmin = false;
 	isUser = false;
+	mode = "home";
 	$(document).ready(function() {
 		userid = $('#userid').html();
 		getUser();
-		getBleets();
 	});
+	
+	layoutHome = function() {
+		resetPage();
+		getUser();
+	}
 	
 	layoutUser = function() {
 		$('.navbar-header')
@@ -39,24 +44,30 @@
 	}
 	
 	layoutAdmin = function() {
-		$('.navbar-header').append('<a class="navbar-brand" href="#" onclick="getUsers()"><span class="glyphicon glyphicon-user"></span>Edit Users</a>')
+		$('.navbar-header').append('<a class="navbar-brand" href="#" onclick="resetPage(); layoutUsers();"><span class="glyphicon glyphicon-user"></span>Edit Users</a>')
 		$('.nav-sidebar').append('<li>Admin</li>');
 		$('#headerRow').append('<th>Block Bleet</th>');
-		$('tr ~ tr')
-			.each(
-					function (key, val) {
-						bid = val.id;
-						$(val).append('<td><input type="checkbox" id="block" onclick="block("'+bid+'")"></td>');
-					});
 	}
 	
-	block = function(bid) {
+	layoutAdminBleets = function() {
+		bleetRows = $('.blockCell');
+		bleetRows.css('visibility', 'visible');
+	}
+	
+	resetPage = function() {
+		page = 0;
+		sort = "username";
+		order = "asc";
+	}
+	
+	blockFunc = function(bid) {
+		bid = bid.trim();
 		ch = $('#'+bid+' input')[0].checked;
 		$.ajax({
-			url : "bleets/" + bid + "/block",
+			url : "bleets/" + bid + "/blck",
 			dataType : 'json',
 			type : 'put',
-			data : { block : ch, page: page, sort: sort, order: order},
+			data : "block=" + ch + "&page=" + page + "&sort=" + sort + "&order=" + order,
 			success : function(data) {				
 				bleets = data;
 				updateBleets();
@@ -65,6 +76,13 @@
 				console.log("There is an error with updating a bleet: " + err);
 			}
 		});	
+	}
+	
+	function flipOrder() {
+		if (order == "asc")
+			order = "desc";
+		else
+			order = "asc";
 	}
 	
 	authority = function() {
@@ -90,6 +108,7 @@
 			success : function(data) {				
 				user = data;
 				authority();
+				getBleets();
 			},
 			failure: function(err) {
 				console.log("There is an error with retrieving user: " + err);
@@ -97,8 +116,8 @@
 		});	
 	}
 	
-	getBleets = function(p) {
-		if (p < 0)
+	getBleets = function() {
+		if (page < 0)
 			page = 0;
 		$.ajax({
 			url : "users/" + userid + "/bleets",
@@ -108,6 +127,7 @@
 			success : function(data) {
 				bleets = data;
 				updateBleets();
+				
 			},
 			failure: function(jqXHR, textStatus, errorThrown) {
 				console.log("There is an error with adding a bleet: " + errorThrown);
@@ -197,26 +217,88 @@
 	}
 	
 	layoutUsers = function() {
-		page = 0;
-		$('tr').empty();
+		userForm = '<div class="form-group"><label for="firstname">Firstname</label><input type="text" id="firstname">' +
+		'</div><div class="form-group"><label for="lastname">Lastname</label><input type="text" id="lastname"></div><div class="form-group">' +
+		'<label for="username">Username</label><input type="text" id="username"></div><div class="form-group"><label for="email">Email</label>' +
+		'<input type="email" id="email"></div><div class="form-group"><label for="password">Password</label><input type="password" id="password">' +
+		'</div><div class="btn btn-sm btn-primary" onclick="addUser()">Add user</div>'; 
+		
+		$('#addBleets').children().remove();
+		$('#addBleets').addClass('form-inline');
+		$('#addBleets').append(userForm);
+		$('tr').remove();
 		table = $('table');
 		table.append('<tr id="headerRow"> <th>Username</th> <th>Name</th> <th>Email</th><th>Admin</th></tr>');
-		getUsers(page);
-		$(users)
-			.each(
-					function(key,val){
-						chk = "";
-						$(val.authorities).each(function(key,val){
-								if (val == "ROLE_ADMIN")
-									chk = "checked";
-							});
-						table.append('<tr id=' + val.id + '> <td>' + val.username + '</td><td>' +
-								val.firstName + ' ' + val.lastName + '</td><td>' + val.email +
-								'</td><td><input type="checkbox" checked="'+chk+'" ></tr>');
-					});
+		getUsers();
 	}
 	
-	getUsers = function(p) {
+	updateUsers = function() {
+		userRows = $('tr ~ tr');
+		userRows.remove();
+		table = $('table');
+		$(users.content)
+			.each(
+				function(key,val){
+					uid = "'"+val.id+"'";
+					str = '<tr id=' + val.id + '> <td>' + val.username + '</td><td>' + val.firstName + ' ' + val.lastName + '</td><td>' + val.email +
+					'</td><td><input onclick="changeAdmin('+uid+')" type="checkbox" ';
+					$(val.authorities).each(function(key,val){
+							if (val == "ROLE_ADMIN")
+								str += 'checked';
+						});
+					str += '></tr>';
+					table.append(str);
+				});
+	}
+	
+	addUser= function(){
+		username = $('#username').val();
+		password = $('#password').val();
+		firstname = $('#firstname').val();
+		lastname = $('#lastname').val();
+		email = $('#email').val();
+		clearUserForm();			
+		$.ajax({
+			url : "users",
+			dataType : 'json',
+			type : 'post',
+			data : { username: username, password:password, firstname:firstname, lastname:lastname, email:email, page:page },
+			success : function(data) {				
+				users = data;
+				updateUsers();
+			},
+			failure: function(err) {
+				console.log("There is an error with updating a bleet: " + err);
+			}
+		});			
+	}
+	
+	clearUserForm = function(){
+		$('#username').val("");
+		$('#password').val("");
+		$('#firstname').val("");
+		$('#lastname').val("");
+		$('#email').val("");
+	}
+	
+	changeAdmin = function(uid) {
+		$.ajax({
+			url : "users/" + uid + "/authorities",
+			dataType : 'json',
+			type : 'put',
+			success : function(data) {				
+				users = data;
+				updateUsers();
+			},
+			failure: function(err) {
+				console.log("There is an error with updating a bleet: " + err);
+			}
+		});	
+	}
+	
+	getUsers = function() {
+		if (page < 0)
+			page = 0;
 		$.ajax({
 			url : "users",
 			dataType : 'json',
@@ -224,6 +306,7 @@
 			type : 'get',
 			success : function(data) {				
 				users = data;
+				updateUsers();
 			},
 			failure: function(err) {
 				console.log("There is an error with retrieving user: " + err);
@@ -231,7 +314,15 @@
 		});	
 	}
 	
-	
+	pagination = function() {
+		if(mode == "home") {
+			getBleets();
+		}
+		else{
+			getUsers();
+		} 
+			
+	}
 
 	clearForm = function() {
 		$('#bleet').val("");
@@ -240,14 +331,22 @@
 
 	updateBleets = function() {
 		var bleetRows = $('tr ~ tr');
-		bleetRows.empty();
+		bleetRows.remove();
 		bleetTable = $('table');
 		$(bleets.content)
 				.each(
 						function(key, val) {
 							bleet = val;
-							bleetTable.append('<tr id=' + bleet.id + '> <td>' + bleet.username + '</td><td>' + bleet.bleet + '</td><td>' + bleet.timestamp + '</td> </tr>');
+							bid = "'"+bleet.id+"'";
+							bleetStr = '<tr id=' + bleet.id + '> <td>' + bleet.username + '</td><td>' + bleet.bleet + '</td><td>' + 
+							bleet.timestamp + '</td> <td class="blockCell" style="visibility: hidden"><input type="checkbox" onclick="blockFunc('+bid+');"';
+							if (bleet.blocked)
+								bleetStr += 'checked';
+							bleetStr += '></td></tr>';
+							bleetTable.append(bleetStr);
 						});
+		if (isAdmin)
+			layoutAdminBleets();
 	}
 	</script>
 </head>
@@ -261,12 +360,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#"><span class="glyphicon glyphicon-home"></span>Bleeter</a>
+          <a class="navbar-brand" href="/bleeter/home"><span class="glyphicon glyphicon-home"></span>Bleeter</a>
           <span style="display:none;" id="userid">${user.id}</span>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="/Bleeter/logout">Logout</a></li>
+            <li><a href="/Bleeter/login.jsp">Logout</a></li>
             <li><a>Welcome <span id="usernameSpan">${user.username}</span></a></li>
           </ul>
           <form class="navbar-form navbar-right">
@@ -285,29 +384,36 @@
 			    </ul>
 	        </div>
 			<div class="col-md-10">
-				<div class="row">
+				<div class="row" id="addBleets">
 					<div class="col-md-2"></div>
-					<div class="col-md-10">
-						Bleet description: <input type="text" class="input-lg" id="bleet">
-						Make comment private?: <input type="checkbox" id="privateComment">
+					<div class="col-md-10 form-inline" >
+						<div class="form-group">
+							<label for="bleet">Bleet description</label>
+							<input type="text" class="input-lg" id="bleet">
+						</div>
+						<div class="form-group">
+							<label for="privateComment">Make comment private?</label>
+							<input type="checkbox" id="privateComment">
+						</div>
 						<div class="btn btn-sm btn-primary" onclick="addBleet()">Add bleet</div>
+						
 					</div>
 				</div>
 				<div class="table-responsive">
 					<table class="table table-hover" id="bleetTable">
-						<tr id="headerRow"> <th>Username</th> <th>Bleet</th> <th>Date</th> </tr>
+						<tr id="headerRow"> <th onclick="sort='username'; flipOrder(); getBleets();" >Username</th> <th>Bleet</th> <th onclick="sort='timestamp'; flipOrder(); getBleets();">Date</th> </tr>
 					</table>
 				</div>
 				<div id="footer">
 					<nav>
 					  <ul class="pagination">
 					    <li>
-					      <button onclick="getBleets(--page)" aria-label="Previous">
+					      <button onclick="page--; pagination();" aria-label="Previous">
 					        <span aria-hidden="true">&laquo;</span>
 					      </button>
 					    </li>
 					    <li>
-					      <button onclick="getBleets(++page)" aria-label="Next">
+					      <button onclick="page++; pagination();" aria-label="Next">
 					        <span aria-hidden="true">&raquo;</span>
 					      </button>
 					    </li>

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -19,6 +20,9 @@ public class UserServices implements UserDetailsService {
 	@Autowired
 	private UserRepository userRepository;
 
+	public static final int PAGE_SIZE = 10;
+	public static final int DEFAULT_PAGE = 0;
+	
 	public BleetUser findById(String uid) {
 		return userRepository.findOne(uid);
 	}
@@ -27,16 +31,13 @@ public class UserServices implements UserDetailsService {
 		return userRepository.findByUsername(username);
 	}
 
-	public BleetUser createUser(BleetUser newUser) {
+	public Page<BleetUser> createUser(BleetUser newUser, int page) {
 		List<String> authorities = new ArrayList<String>();
 		authorities.add("ROLE_USER");
-		return userRepository.insert(newUser);
+		userRepository.insert(newUser);
+		return findAllUsers(page);
 	}
 
-	public Page<BleetUser> findAll(int min, int max) {
-		return userRepository.findAll(new PageRequest(min, max));
-	}
-	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
 		BleetUser user = userRepository.findByUsername(username);
@@ -59,14 +60,25 @@ public class UserServices implements UserDetailsService {
 		return userRepository.update(user);
 	}
 
-	public BleetUser makeAdmin(String uid) {
-		// TODO Auto-generated method stub
-		return null;
+	public Page<BleetUser> changeAdmin(String uid, int page) {
+		BleetUser user = userRepository.findOne(uid);
+		List<String> auths = user.getAuthorities();
+		boolean isAdmin = false;
+		for (String auth : auths) {
+			if (auth.equals("ROLE_ADMIN"))
+				isAdmin = true;
+		}
+		if(isAdmin)
+			auths.remove("ROLE_ADMIN");
+		else
+			auths.add("ROLE_ADMIN");
+		userRepository.save(user);
+		return findAllUsers(page);
 	}
-
-	public BleetUser changeBlock(String bid, Boolean block) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	public Page<BleetUser> findAllUsers(int p) {
+		Pageable page = new PageRequest(p, PAGE_SIZE);
+		return userRepository.findAll(page);
 	}
 	
 }

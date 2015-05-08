@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,6 +40,8 @@ public class BleetController {
 		else {
 			s = new Sort(Direction.DESC, sort);
 		}
+		if (page < 0)
+			page = 0;
 		return bleetServices.findAllBleets(page, s);
 	}
 	
@@ -67,26 +70,30 @@ public class BleetController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "users/{uid}/authorities", method = RequestMethod.PUT)
 	@ResponseBody
-	public BleetUser makeAdmin(@PathVariable String uid) {
-		return userServices.makeAdmin(uid);
+	public Page<BleetUser> changeAdmin(@PathVariable String uid,
+			@RequestParam(required = false, defaultValue="0") Integer page) {
+		return userServices.changeAdmin(uid, page);
 	}
 	
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "/bleets/{bid}/block", method = RequestMethod.PUT)
+	@RequestMapping(value = "/bleets/{bid}/blck", method = RequestMethod.PUT)
 	@ResponseBody
-	public BleetUser changeBlock(@PathVariable String bid,
-			@RequestParam Boolean block) {
-		return userServices.changeBlock(bid, block);
+	public Page<Bleet> changeBlock(@PathVariable String bid,
+			@RequestBody Boolean block,
+			@RequestBody Integer page,
+			@RequestBody String sort,
+			@RequestBody String order) {
+		Sort s;
+		if (order.equals("ASC")) {
+			s = new Sort(Direction.ASC, sort);
+		}
+		else {
+			s = new Sort(Direction.DESC, sort);
+		} 
+		return bleetServices.changeBlock(bid, page, s, block);
 	}
 	
 	/*@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "users/{uid}/authorities", method = RequestMethod.DELETE)
-	@ResponseBody
-	public BleetUser removeAdmin(@PathVariable String uid) {
-		return userServices.removeAdmin(uid);
-	}
-	
-	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "/bleets")
 	@ResponseBody
 	public List<Bleet> searchBleets(@RequestParam(required=false, defaultValue="") String username,
@@ -97,14 +104,15 @@ public class BleetController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "users", method = RequestMethod.POST)
 	@ResponseBody
-	public BleetUser createUser(@RequestParam String username,
+	public Page<BleetUser> createUser(@RequestParam String username,
 			@RequestParam String password,
 			@RequestParam String firstname,
 			@RequestParam String lastname,
-			@RequestParam String email) {
+			@RequestParam String email,
+			@RequestParam(required = false, defaultValue="0") Integer page) {
 		BleetUser newUser = new BleetUser.Builder().username(username).password(password)
 				.firstName(firstname).lastName(lastname).email(email).build();
-		return userServices.createUser(newUser);
+		return userServices.createUser(newUser, page);
 	}
 
 	@Secured("ROLE_ADMIN")
@@ -112,7 +120,7 @@ public class BleetController {
 	@ResponseBody
 	public Page<BleetUser> getUsers(
 			@RequestParam(required = false, defaultValue="0") Integer page){			
-		return userServices.findAll(page*2, page*2+9);
+		return userServices.findAllUsers(page);
 	}
 
 	@Secured("ROLE_USER")
@@ -130,6 +138,8 @@ public class BleetController {
 		else {
 			s = new Sort(Direction.DESC, sort);
 		}
+		if (page < 0)
+			page = 0;
 		return bleetServices.findBleets(uid, page, s);
 	}
 	
