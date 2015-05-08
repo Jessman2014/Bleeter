@@ -1,6 +1,7 @@
 package bleeter.bleets;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,13 +79,15 @@ public class BleetController {
 	}
 	
 	@Secured("ROLE_ADMIN")
-	@RequestMapping(value = "/bleets/{bid}/blck", method = RequestMethod.PUT)
+	@RequestMapping(value = "/bleets/{bid}/block", method = RequestMethod.PUT)
 	@ResponseBody
 	public Page<Bleet> changeBlock(@PathVariable String bid,
-			@RequestBody Boolean block,
-			@RequestBody Integer page,
-			@RequestBody String sort,
-			@RequestBody String order) {
+			@RequestBody MultiValueMap<String, String> body) {
+		Integer page = Integer.parseInt(body.getFirst("page"));
+		String order = body.getFirst("order");
+		String sort = body.getFirst("sort");
+		Boolean block = Boolean.parseBoolean(body.getFirst("block"));
+		
 		Sort s;
 		if (order.equals("asc")) {
 			s = new Sort(Direction.ASC, sort);
@@ -95,13 +99,18 @@ public class BleetController {
 	}
 	
 	
-	@RequestMapping(value = "/bleets/username/{username}/before/{timestamp}")
+	@RequestMapping(value = "/bleets/username/{username}")
 	@ResponseBody
-	public Page<Bleet> searchByUsernameBefore(
+	public List<Bleet> searchByUsernameBefore(
 			@PathVariable String username,
-			@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date timestamp,
+			@RequestParam(required=false, defaultValue="2999-01-01") @DateTimeFormat(pattern="yyyy-MM-dd") Date after,
+			@RequestParam(required=false, defaultValue="1000-01-01") @DateTimeFormat(pattern="yyyy-MM-dd") Date before,
+			@RequestParam(required=false, defaultValue="false") Boolean and,
 			@RequestParam(required=false, defaultValue="0") Integer page) {
-		return bleetServices.searchByUsernameBefore(page, username, timestamp);
+		if (and)
+			return bleetServices.searchRangeAndUsername(before, after, username, page);
+		else
+			return bleetServices.searchRangeOrUsername(before, after, username, page);
 	}
 	
 	@RequestMapping(value = "/bleets/username/{username}/after/{timestamp}")

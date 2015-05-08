@@ -40,7 +40,7 @@
 	        <div class="col-md-2">
 			    <ul class="nav nav-sidebar">
 			      <li class="avatar-circle"><img src="users/${user.id}/avatar" id="avatarImage" class="avatar"></li>
-			      <li><h3 id="userid">${user.username}</h3></li>
+			      <li><h3 id="userid">${user.username}<span class="glyphicon glyphicon-pencil"></span></h3></li>
 			    </ul>
 	        </div>
 			<div class="col-md-10">

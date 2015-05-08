@@ -10,7 +10,7 @@ user = {};
 	isAdmin = false;
 	isUser = false;
 	mode = "home";
-	searchFunc = getAllBleets;
+	searchFunc = null;
 	$(document).ready(function() {
 		userid = $('#userid').html();
 		getUser();
@@ -23,6 +23,7 @@ user = {};
 			  modal.find('.modal-title').text('New message to ' + recipient)
 			  modal.find('.modal-body input').val(recipient)
 			})
+		searchFunc = getAllBleets;
 	});
 	
 	layoutHome = function() {
@@ -57,7 +58,7 @@ user = {};
 		bid = bid.trim();
 		ch = $('#'+bid+' input')[0].checked;
 		$.ajax({
-			url : "bleets/" + bid + "/blck",
+			url : "bleets/" + bid + "/block",
 			dataType : 'json',
 			type : 'put',
 			data : "block=" + ch + "&page=" + page + "&sort=" + sort + "&order=" + order,
@@ -366,25 +367,35 @@ user = {};
 		usr = $('#searchUsername').val();
 		beforeDate = $('#beforeDate').val();
 		afterDate = $('#afterDate').val();
-		if (usr && beforeDate){
-			searchFunc = searchUserBefore(usr, beforeDate);
+		if (usr && (beforeDate || afterDate)){
+			searchFunc = searchUserRange(true, usr, beforeDate, afterDate);
 		}
-		else if (usr && afterDate) {
-			searchFunc = searchUserAfter(usr, afterDate);
-		}
-		else if (usr) {
-			searchFunc = searchUsername(usr);
-		}
-		else if (beforeDate) {
-			searchFunc = searchBefore(beforeDate);
-		}
-		else if (afterDate) {
-			searchFunc = searchAfter(afterDate);
+		else if (usr || beforeDate || afterDate){
+			searchFunc = searchUserRange(false, usr, beforeDate, afterDate);
 		}
 		else {
-			searchFunc = getAllBleets;
+			searchFunc = getAllBleets();
 		}
 	}
+	
+	searchUserRange = function(and, usr, beforeDate, afterDate) {
+		if (page < 0)
+			page = 0;
+		$.ajax({
+			url : "bleets/username/"+usr,
+			dataType : 'json',
+			data: { page: page, and:and, before:beforeDate, after:afterDate},
+			type : 'get',
+			success : function(data) {
+				bleets = data;
+				updateBleets();
+			},
+			failure: function(jqXHR, textStatus, errorThrown) {
+				console.log("There is an error with adding a bleet: " + errorThrown);
+			}
+		});		
+	}
+	
 	
 	searchUserBefore = function(usr, beforeDate) {
 		if (page < 0)
