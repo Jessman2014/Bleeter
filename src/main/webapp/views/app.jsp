@@ -69,7 +69,7 @@
 		        	<input type="text" id="searchUsername" class="form-control" placeholder="Search Usernames...">
 		        	<input type="date" id="beforeDate" class="form-control" placeholder="Before Date...">
 		        	<input type="date" id="afterDate" class="form-control" placeholder="After Date...">
-		        	<span class="glyphicon glyphicon-search" onclick="search=true; searchUsername();"></span>
+		        	<span class="glyphicon glyphicon-search" onclick="search();"></span>
 		        </form>
 				<!-- Button trigger modal -->
 				<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">

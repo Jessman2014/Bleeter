@@ -43,20 +43,6 @@ public class BleetServices {
 		return bleetRepository.findAll(page);
 	}
 	
-	public Page<Bleet> searchByUsername(int p, String username){
-		Pageable page = new PageRequest(p, PAGE_SIZE);
-		return bleetRepository.findByUsernameLike(username, page);
-	}
-	
-	public Page<Bleet> searchByTimestamp(int p, Date before, Date after){
-		Pageable page = new PageRequest(p, PAGE_SIZE);
-		return bleetRepository.findByTimestampBeforeAndTimestampAfter(before, after, page);
-	}
-	
-	public Page<Bleet> searchByTimestamp(int p, Date d){
-		Pageable page = new PageRequest(p, PAGE_SIZE);
-		return bleetRepository.findByTimestampLike(d, page);
-	}
 	
 	public Page<Bleet> addBleet(String uid, Bleet newBleet) {
 		readSentiment(newBleet);
@@ -128,6 +114,33 @@ public class BleetServices {
 		newBleet.setBlocked(block);
 		bleetRepository.save(newBleet);
 		return findAllBleets(page, s);
+	}
+
+	public Page<Bleet> searchByUsernameBefore(Integer p, String username,
+			Date timestamp) {
+		Pageable page = new PageRequest(p, PAGE_SIZE);
+		return bleetRepository.findByTimestampBeforeAndUsernameLike(timestamp, username, page);
+	}
+
+	public Page<Bleet> searchByUsernameAfter(Integer p, String username,
+			Date timestamp) {
+		Pageable page = new PageRequest(p, PAGE_SIZE);
+		return bleetRepository.findByTimestampAfterAndUsernameLike(timestamp, username, page);
+	}
+	
+	public Page<Bleet> searchByUsername(int p, String username){
+		Pageable page = new PageRequest(p, PAGE_SIZE);
+		return bleetRepository.findByUsernameLike(username, page);
+	}
+
+	public Page<Bleet> searchBefore(Integer p, Date timestamp) {
+		Pageable page = new PageRequest(p, PAGE_SIZE);
+		return bleetRepository.findByTimestampBefore(timestamp, page);
+	}
+
+	public Page<Bleet> searchAfter(Integer p, Date timestamp) {
+		Pageable page = new PageRequest(p, PAGE_SIZE);
+		return bleetRepository.findByTimestampAfter(timestamp, page);
 	}
 
 	

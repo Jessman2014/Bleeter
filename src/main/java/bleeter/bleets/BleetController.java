@@ -94,28 +94,46 @@ public class BleetController {
 		return bleetServices.changeBlock(bid, page, s, block);
 	}
 	
+	
+	@RequestMapping(value = "/bleets/username/{username}/before/{timestamp}")
+	@ResponseBody
+	public Page<Bleet> searchByUsernameBefore(
+			@PathVariable String username,
+			@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date timestamp,
+			@RequestParam(required=false, defaultValue="0") Integer page) {
+		return bleetServices.searchByUsernameBefore(page, username, timestamp);
+	}
+	
+	@RequestMapping(value = "/bleets/username/{username}/after/{timestamp}")
+	@ResponseBody
+	public Page<Bleet> searchByUsernameAfter(
+			@PathVariable String username,
+			@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date timestamp,
+			@RequestParam(required=false, defaultValue="0") Integer page) {
+		return bleetServices.searchByUsernameAfter(page, username, timestamp);
+	}
+	
 	@RequestMapping(value = "/bleets/username")
 	@ResponseBody
-	public Page<Bleet> searchBleetsByUsername(@RequestParam String username,
+	public Page<Bleet> searchByUsername(@RequestParam String username,
 			@RequestParam(required=false, defaultValue="0") Integer page) {
 		return bleetServices.searchByUsername(page, username);
 	}
-	
-	@RequestMapping(value = "/bleets/timestamp")
+
+	@RequestMapping(value = "/bleets/before/{timestamp}")
 	@ResponseBody
-	public Page<Bleet> searchBleetsByTimestamp(
-			@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date timestamp,
+	public Page<Bleet> searchByBefore(
+			@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date timestamp,
 			@RequestParam(required=false, defaultValue="0") Integer page) {
-		return bleetServices.searchByTimestamp(page, timestamp);
+		return bleetServices.searchBefore(page, timestamp);
 	}
 	
-	@RequestMapping(value = "/bleets/timestamps")
+	@RequestMapping(value = "/bleets/after/{timestamp}")
 	@ResponseBody
-	public Page<Bleet> searchBleetsByTimestamps(
-			@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date before,
-			@RequestParam @DateTimeFormat(pattern="yyyy-MM-dd") Date after,
+	public Page<Bleet> searchByAfter(
+			@PathVariable @DateTimeFormat(pattern="yyyy-MM-dd") Date timestamp,
 			@RequestParam(required=false, defaultValue="0") Integer page) {
-		return bleetServices.searchByTimestamp(page, before, after);
+		return bleetServices.searchAfter(page, timestamp);
 	}
 
 	@Secured("ROLE_ADMIN")

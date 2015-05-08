@@ -10,7 +10,7 @@ user = {};
 	isAdmin = false;
 	isUser = false;
 	mode = "home";
-	search = false;
+	searchFunc = getAllBleets;
 	$(document).ready(function() {
 		userid = $('#userid').html();
 		getUser();
@@ -329,10 +329,10 @@ user = {};
 	
 	pagination = function() {
 		if(mode == "home") {
-			getAllBleets();
+			searchFunc();
 		}
 		else{
-			getUsers();
+			searchFunc();
 		} 
 			
 	}
@@ -362,15 +362,37 @@ user = {};
 			layoutAdminBleets();
 	}
 	
-	searchUsername = function() {
-		if (page < 0)
-			page = 0;
+	search = function() {
+		usr = $('#searchUsername').val();
 		beforeDate = $('#beforeDate').val();
 		afterDate = $('#afterDate').val();
+		if (usr && beforeDate){
+			searchFunc = searchUserBefore(usr, beforeDate);
+		}
+		else if (usr && afterDate) {
+			searchFunc = searchUserAfter(usr, afterDate);
+		}
+		else if (usr) {
+			searchFunc = searchUsername(usr);
+		}
+		else if (beforeDate) {
+			searchFunc = searchBefore(beforeDate);
+		}
+		else if (afterDate) {
+			searchFunc = searchAfter(afterDate);
+		}
+		else {
+			searchFunc = getAllBleets;
+		}
+	}
+	
+	searchUserBefore = function(usr, beforeDate) {
+		if (page < 0)
+			page = 0;
 		$.ajax({
-			url : "bleets/timestamp",
+			url : "bleets/username/"+usr+"/before/" + beforeDate,
 			dataType : 'json',
-			data: { page: page, before:beforeDate, after:afterDate},
+			data: { page: page},
 			type : 'get',
 			success : function(data) {
 				bleets = data;
@@ -381,3 +403,76 @@ user = {};
 			}
 		});		
 	}
+	
+	searchUserAfter = function(usr, afterDate) {
+		if (page < 0)
+			page = 0;
+		$.ajax({
+			url : "bleets/username/"+usr+"/after/" + afterDate,
+			dataType : 'json',
+			data: { page: page},
+			type : 'get',
+			success : function(data) {
+				bleets = data;
+				updateBleets();
+			},
+			failure: function(jqXHR, textStatus, errorThrown) {
+				console.log("There is an error with adding a bleet: " + errorThrown);
+			}
+		});		
+	}
+	
+	searchUsername = function(usr) {
+		if (page < 0)
+			page = 0;
+		$.ajax({
+			url : "bleets/username/"+usr,
+			dataType : 'json',
+			data: { page: page},
+			type : 'get',
+			success : function(data) {
+				bleets = data;
+				updateBleets();
+			},
+			failure: function(jqXHR, textStatus, errorThrown) {
+				console.log("There is an error with adding a bleet: " + errorThrown);
+			}
+		});		
+	}
+	
+	searchBefore = function(beforeDate) {
+		if (page < 0)
+			page = 0;
+		$.ajax({
+			url : "bleets/before/" + beforeDate,
+			dataType : 'json',
+			data: { page: page},
+			type : 'get',
+			success : function(data) {
+				bleets = data;
+				updateBleets();
+			},
+			failure: function(jqXHR, textStatus, errorThrown) {
+				console.log("There is an error with adding a bleet: " + errorThrown);
+			}
+		});		
+	}
+	
+	searchAfter = function(afterDate) {
+		if (page < 0)
+			page = 0;
+		$.ajax({
+			url : "bleets/after/" + afterDate,
+			dataType : 'json',
+			data: { page: page},
+			type : 'get',
+			success : function(data) {
+				bleets = data;
+				updateBleets();
+			},
+			failure: function(jqXHR, textStatus, errorThrown) {
+				console.log("There is an error with adding a bleet: " + errorThrown);
+			}
+		});		
+	}
+	
