@@ -10,18 +10,15 @@ user = {};
 	isAdmin = false;
 	isUser = false;
 	mode = "home";
-	searchFunc = null;
+	length = 0;
 	$(document).ready(function() {
 		userid = $('#userid').html();
 		getUser();
 		$('#myModal').on('show.bs.modal', function (event) {
 			  var button = $(event.relatedTarget) // Button that triggered the modal
-			  var recipient = button.data('whatever') // Extract info from data-* attributes
-			  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-			  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
 			  var modal = $(this)
-			  modal.find('.modal-title').text('New message to ' + recipient)
-			  modal.find('.modal-body input').val(recipient)
+			  //modal.find('.modal-title').text('New message to ' + recipient)
+			  //modal.find('.modal-body input').val(recipient)
 			})
 		searchFunc = getAllBleets;
 	});
@@ -231,15 +228,6 @@ user = {};
 	}
 	
 	layoutUsers = function() {
-		userForm = '<div class="form-group"><label for="firstname">Firstname</label><input type="text" id="firstname">' +
-		'</div><div class="form-group"><label for="lastname">Lastname</label><input type="text" id="lastname"></div><div class="form-group">' +
-		'<label for="username">Username</label><input type="text" id="username"></div><div class="form-group"><label for="email">Email</label>' +
-		'<input type="email" id="email"></div><div class="form-group"><label for="password">Password</label><input type="password" id="password">' +
-		'</div><div class="btn btn-sm btn-primary" onclick="addUser()">Add user</div>'; 
-		
-		$('#addBleets').children().remove();
-		$('#addBleets').addClass('form-inline');
-		$('#addBleets').append(userForm);
 		$('tr').remove();
 		table = $('table');
 		table.append('<tr id="headerRow"> <th>Username</th> <th>Name</th> <th>Email</th><th>Admin</th></tr>');
@@ -250,6 +238,8 @@ user = {};
 		userRows = $('tr ~ tr');
 		userRows.remove();
 		table = $('table');
+		length = users.totalElements;
+		calcPages();
 		$(users.content)
 			.each(
 				function(key,val){
@@ -347,6 +337,8 @@ user = {};
 		var bleetRows = $('tr ~ tr');
 		bleetRows.remove();
 		bleetTable = $('table');
+		length = bleets.totalElements;
+		calcPages();
 		$(bleets.content)
 				.each(
 						function(key, val) {
@@ -363,28 +355,32 @@ user = {};
 			layoutAdminBleets();
 	}
 	
+	calcPages = function() {
+		$('ul.pagination li').not(':first').not(':last').remove();
+		for(i=0;i<length/10;i+=1){
+			$('ul.pagination li:last').before('<li><a href="#" onclick="page=' + i + ';pagination();">'+(i+1)+'</a><li>');
+		}
+	}
+	
 	search = function() {
 		usr = $('#searchUsername').val();
 		beforeDate = $('#beforeDate').val();
 		afterDate = $('#afterDate').val();
-		if (usr && (beforeDate || afterDate)){
-			searchFunc = searchUserRange(true, usr, beforeDate, afterDate);
-		}
-		else if (usr || beforeDate || afterDate){
-			searchFunc = searchUserRange(false, usr, beforeDate, afterDate);
+		if (usr || beforeDate || afterDate){
+			searchUserRange(usr, beforeDate, afterDate);
 		}
 		else {
-			searchFunc = getAllBleets();
+			getAllBleets();
 		}
 	}
 	
-	searchUserRange = function(and, usr, beforeDate, afterDate) {
+	searchUserRange = function(usr, beforeDate, afterDate) {
 		if (page < 0)
 			page = 0;
 		$.ajax({
-			url : "bleets/username/"+usr,
+			url : "bleets",
 			dataType : 'json',
-			data: { page: page, and:and, before:beforeDate, after:afterDate},
+			data: { page: page, username:usr, before:beforeDate, after:afterDate},
 			type : 'get',
 			success : function(data) {
 				bleets = data;
@@ -395,95 +391,3 @@ user = {};
 			}
 		});		
 	}
-	
-	
-	searchUserBefore = function(usr, beforeDate) {
-		if (page < 0)
-			page = 0;
-		$.ajax({
-			url : "bleets/username/"+usr+"/before/" + beforeDate,
-			dataType : 'json',
-			data: { page: page},
-			type : 'get',
-			success : function(data) {
-				bleets = data;
-				updateBleets();
-			},
-			failure: function(jqXHR, textStatus, errorThrown) {
-				console.log("There is an error with adding a bleet: " + errorThrown);
-			}
-		});		
-	}
-	
-	searchUserAfter = function(usr, afterDate) {
-		if (page < 0)
-			page = 0;
-		$.ajax({
-			url : "bleets/username/"+usr+"/after/" + afterDate,
-			dataType : 'json',
-			data: { page: page},
-			type : 'get',
-			success : function(data) {
-				bleets = data;
-				updateBleets();
-			},
-			failure: function(jqXHR, textStatus, errorThrown) {
-				console.log("There is an error with adding a bleet: " + errorThrown);
-			}
-		});		
-	}
-	
-	searchUsername = function(usr) {
-		if (page < 0)
-			page = 0;
-		$.ajax({
-			url : "bleets/username/"+usr,
-			dataType : 'json',
-			data: { page: page},
-			type : 'get',
-			success : function(data) {
-				bleets = data;
-				updateBleets();
-			},
-			failure: function(jqXHR, textStatus, errorThrown) {
-				console.log("There is an error with adding a bleet: " + errorThrown);
-			}
-		});		
-	}
-	
-	searchBefore = function(beforeDate) {
-		if (page < 0)
-			page = 0;
-		$.ajax({
-			url : "bleets/before/" + beforeDate,
-			dataType : 'json',
-			data: { page: page},
-			type : 'get',
-			success : function(data) {
-				bleets = data;
-				updateBleets();
-			},
-			failure: function(jqXHR, textStatus, errorThrown) {
-				console.log("There is an error with adding a bleet: " + errorThrown);
-			}
-		});		
-	}
-	
-	searchAfter = function(afterDate) {
-		if (page < 0)
-			page = 0;
-		$.ajax({
-			url : "bleets/after/" + afterDate,
-			dataType : 'json',
-			data: { page: page},
-			type : 'get',
-			success : function(data) {
-				bleets = data;
-				updateBleets();
-			},
-			failure: function(jqXHR, textStatus, errorThrown) {
-				console.log("There is an error with adding a bleet: " + errorThrown);
-			}
-		});		
-	}
-	

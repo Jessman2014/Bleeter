@@ -2,7 +2,6 @@ package bleeter.bleets;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -15,20 +14,16 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.BasicQuery;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import bleeter.MongoFactoryConfig;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,9 +32,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BleetServices {
 	@Autowired
 	private BleetRepository bleetRepository;
-	
-	ApplicationContext ctx = new AnnotationConfigApplicationContext(MongoFactoryConfig.class);
-	MongoOperations mongoOperation = (MongoOperations) ctx.getBean("mongoTemplate");
+	@Autowired
+	MongoTemplate mongoTemplate;
 	
 	public static final String SENTIMENT_HOST = "sentiment.vivekn.com/api/text/";
 	public static final int PAGE_SIZE = 10;
@@ -60,7 +54,7 @@ public class BleetServices {
 	public Page<Bleet> addBleet(String uid, Bleet newBleet) {
 		readSentiment(newBleet);
 		bleetRepository.insert(newBleet);
-		return findBleets(uid, DEFAULT_PAGE, DEFAULT_SORT);
+		return findAllBleets(DEFAULT_PAGE, DEFAULT_SORT);
 	}
 	
 	public Page<Bleet> deleteBleet(String uid, String bid) {
@@ -129,51 +123,20 @@ public class BleetServices {
 		return findAllBleets(page, s);
 	}
 
-	public Page<Bleet> searchByUsernameBefore(Integer p, String username,
-			Date timestamp) {
-		Pageable page = new PageRequest(p, PAGE_SIZE);
-		return bleetRepository.findByTimestampBeforeAndUsernameLike(timestamp, username, page);
-	}
-
-	public Page<Bleet> searchByUsernameAfter(Integer p, String username,
-			Date timestamp) {
-		Pageable page = new PageRequest(p, PAGE_SIZE);
-		return bleetRepository.findByTimestampAfterAndUsernameLike(timestamp, username, page);
-	}
-	
-	public Page<Bleet> searchByUsername(int p, String username){
-		Pageable page = new PageRequest(p, PAGE_SIZE);
-		return bleetRepository.findByUsernameLike(username, page);
-	}
-
-	public Page<Bleet> searchBefore(Integer p, Date timestamp) {
-		Pageable page = new PageRequest(p, PAGE_SIZE);
-		return bleetRepository.findByTimestampBefore(timestamp, page);
-	}
-
-	public Page<Bleet> searchAfter(Integer p, Date timestamp) {
-		Pageable page = new PageRequest(p, PAGE_SIZE);
-		return bleetRepository.findByTimestampAfter(timestamp, page);
-	}
-	
-	public List<Bleet> searchRangeOrUsername (Date before, Date after, String username, int p) {
-		Query query = new Query().addCriteria(Criteria.where("timestamp").gte(after).lt(before).orOperator(Criteria.where("username").regex(username)));
-		query.skip(p*PAGE_SIZE);
-		query.limit(PAGE_SIZE);
-		return mongoOperation.find(query, Bleet.class);
-	}
-	
-	public List<Bleet> searchRangeAndUsername (Date before, Date after, String username, int p) {
-		//SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss'Z'");
-		//String beforeStr = "ISODate(\"" + dateFormat.format(before) + "\")";
-		//String afterStr = "ISODate(\"" + dateFormat.format(after) + "\")";
-		//BasicQuery query = new BasicQuery("{timestamp: {\"$gte\": " + afterStr + " , \"$lt\" : " + beforeStr + "},username:{$regex:\""+username+"\"}}");
-		mongoOperation.
-		Query query = new Query().addCriteria(Criteria.where("timestamp").regex(username));
-		//query.limit(1);
-		//query.skip(p*PAGE_SIZE);
-		//query.limit(PAGE_SIZE);
-		return mongoOperation.find(query, Bleet.class);
+	public Page<Bleet> searchRangeAndUsername (Date before, Date after, String username, int p, Sort s) {
+		Pageable page = new PageRequest(p, PAGE_SIZE, s);
+		Query query = new Query().with(page)
+				.addCriteria(
+						Criteria.where("timestamp")
+						.gte(before)
+						.lt(after)
+						.and("username")
+						.regex(username)
+						);
+		List<Bleet> b = mongoTemplate.find(query, Bleet.class);
+		long total = mongoTemplate.count(new Query(), Bleet.class);
+		Page<Bleet> bleets = new PageImpl<Bleet>(b, page, total);
+		return bleets;
 	}
 
 	

@@ -85,7 +85,29 @@
 				        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
 				      </div>
 				      <div class="modal-body">
-				        ...
+				      	<form>
+				      		<div class="form-group">
+				      			<label for="firstname">Firstname</label>
+				      			<input type="text" id="firstname">
+				      		</div>
+				      		<div class="form-group">
+				      			<label for="lastname">Lastname</label>
+				      			<input type="text" id="lastname">
+				      		</div>
+				      		<div class="form-group">
+				      			<label for="username">Username</label>
+				      			<input type="text" id="username">
+				      		</div>
+				      		<div class="form-group">
+				      			<label for="email">Email</label>
+				      			<input type="email" id="email">
+				      		</div>
+				      		<div class="form-group">
+					      		<label for="password">Password</label>
+					      		<input type="password" id="password">
+					      	</div>
+					      	<div class="btn btn-primary" >Add user</div>
+				      	</form>
 				      </div>
 				      <div class="modal-footer">
 				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -98,14 +120,14 @@
 					<nav>
 					  <ul class="pagination">
 					    <li>
-					      <button onclick="page--; pagination();" aria-label="Previous">
+					      <a href="#" onclick="page--; pagination();" aria-label="Previous">
 					        <span aria-hidden="true">&laquo;</span>
-					      </button>
+					      </a>
 					    </li>
 					    <li>
-					      <button onclick="page++; pagination();" aria-label="Next">
+					      <a href="#" onclick="page++; pagination();" aria-label="Next">
 					        <span aria-hidden="true">&raquo;</span>
-					      </button>
+					      </a>
 					    </li>
 					  </ul>
 					</nav>
