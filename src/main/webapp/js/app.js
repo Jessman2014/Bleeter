@@ -1,7 +1,7 @@
 /**
  * 
  */
-user = {};
+	user = {};
 	users = {};
 	bleets = {};
 	page = 0;
@@ -11,27 +11,33 @@ user = {};
 	isUser = false;
 	mode = "home";
 	length = 0;
+	userid= "";
 	$(document).ready(function() {
 		userid = $('#userid').html();
+		$('#newUserButton').hide();
 		getUser();
-		$('#myModal').on('show.bs.modal', function (event) {
+		$('#changeUser').on('show.bs.modal', function (event) {
+			  var button = $(event.relatedTarget) // Button that triggered the modal
+			  var modal = $(this);
+			});
+		$('#newUser').on('show.bs.modal', function (event) {
 			  var button = $(event.relatedTarget) // Button that triggered the modal
 			  var modal = $(this)
-			  //modal.find('.modal-title').text('New message to ' + recipient)
-			  //modal.find('.modal-body input').val(recipient)
-			})
-		searchFunc = getAllBleets;
+			});
+		$('#changeBleet').on('show.bs.modal', function (event) {
+			  var button = $(event.relatedTarget) // Button that triggered the modal
+			  var modal = $(this);
+			});
+		$('#newBleet').on('show.bs.modal', function (event) {
+			  var button = $(event.relatedTarget) // Button that triggered the modal
+			  var modal = $(this)
+			});
 	});
 	
-	layoutHome = function() {
-		resetPage();
-		getUser();
-	}
-	
 	layoutUser = function() {
+		
 		$('.navbar-header')
-			.append('<a class="navbar-brand" href="#" onclick="getUsersBleets()"><span class="glyphicon glyphicon-tasks"></span>My Bleets</a>' +
-					'<a class="navbar-brand" href="#" onclick="layoutUpdate()"><span class="glyphicon glyphicon-pencil"></span>Edit Profile</a>');
+			.append('<a class="navbar-brand" href="#" onclick="layoutUserBleets()"><span class="glyphicon glyphicon-tasks"></span>My Bleets</a>');
 	}
 	
 	layoutAdmin = function() {
@@ -58,10 +64,8 @@ user = {};
 			url : "bleets/" + bid + "/block",
 			dataType : 'json',
 			type : 'put',
-			data : "block=" + ch + "&page=" + page + "&sort=" + sort + "&order=" + order,
 			success : function(data) {				
-				bleets = data;
-				updateBleets();
+				pagination();
 			},
 			failure: function(err) {
 				console.log("There is an error with updating a bleet: " + err);
@@ -69,7 +73,8 @@ user = {};
 		});	
 	}
 	
-	function flipOrder() {
+	function flipOrder(sort) {
+		sort = sort;
 		if (order == "asc")
 			order = "desc";
 		else
@@ -106,48 +111,10 @@ user = {};
 			}
 		});	
 	}
-	
-	getAllBleets = function() {
-		if(page <0)
-			page=0;
-		$.ajax({
-			url : "bleets",
-			dataType : 'json',
-			data: { page: page, sort: sort, order: order},
-			type : 'get',
-			success : function(data) {
-				bleets = data;
-				updateBleets();
-			},
-			failure: function(jqXHR, textStatus, errorThrown) {
-				console.log("There is an error with adding a bleet: " + errorThrown);
-			}
-		});		
-	}
-	
-	getBleets = function() {
-		if (page < 0)
-			page = 0;
-		$.ajax({
-			url : "users/" + userid + "/bleets",
-			dataType : 'json',
-			data: { page: page, sort: sort, order: order},
-			type : 'get',
-			success : function(data) {
-				bleets = data;
-				updateBleets();
-				
-			},
-			failure: function(jqXHR, textStatus, errorThrown) {
-				console.log("There is an error with adding a bleet: " + errorThrown);
-			}
-		});		
-	}
 
 	addBleet = function() {		
 		bleet = $('#bleet').val();
-		checked = $('input:checked').length === 1;
-		//isPrivate = $('#privateComment').attr('checked') === "checked";
+		checked = $('#privateComment:checked').length === 1;
 		clearForm();			
 		$.ajax({
 			url : "users/" + userid + "/bleets",
@@ -155,8 +122,7 @@ user = {};
 			type : 'post',
 			data : { bleet : bleet, privatecomment : checked },
 			success : function(data) {				
-				bleets = data;
-				updateBleets();
+				pagination();
 			},
 			failure: function(jqXHR, textStatus, errorThrown) {
 				console.log("There is an error with adding a bleet: " + errorThrown);
@@ -164,26 +130,23 @@ user = {};
 		});					
 	}
 
-	updateBleet = function(id) {		
+	changeBleet = function(id) {		
 		bleet = $('#bleet').val();
-		privateCommment = $('#privateComment').val();
+		checked = $('#changePrivateComment:checked').length === 1;
 		clearForm();			
 		$.ajax({
 			url : "users/" + userid + "/bleets" + id,
 			dataType : 'json',
 			type : 'put',
-			data : { bleet : bleet, privateComment : privateComment },
+			data : { bleet : bleet, privateComment : checked },
 			success : function(data) {				
-				user = data;
-				updateBleets();
+				pagination();
 			},
 			failure: function(err) {
 				console.log("There is an error with updating a bleet: " + err);
 			}
 		});					
 	}
-	
-	
 
 	addAvatar = function() {
 		imageFile = document.getElementById('avatar').files[0];
@@ -218,8 +181,7 @@ user = {};
 			dataType : 'json',
 			type : 'delete',
 			success : function(data) {
-				user = data;
-				updateBleets();
+				pagination();
 			},
 			failure : function(err) {
 				console.log("There is an error with adding a bleet: " + err);
@@ -228,9 +190,25 @@ user = {};
 	}
 	
 	layoutUsers = function() {
+		mode = "users";
+		$('#newUserButton').show();
+		$('#newBleetButton').hide();
+		resetPage();
 		$('tr').remove();
 		table = $('table');
 		table.append('<tr id="headerRow"> <th>Username</th> <th>Name</th> <th>Email</th><th>Admin</th></tr>');
+		getUsers();
+	}
+	
+	layoutUsersBleets = function() {
+		mode = "usersbleets";
+		$('#newUserButton').hide();
+		$('#newBleetButton').show();
+		resetPage();
+		$('tr').remove();
+		table = $('table');
+		table.append('<tr id="headerRow"> <th onclick="flipOrder(username); pagination();" >Username</th>'+
+				' <th>Bleet</th> <th onclick="flipOrder(timestamp); pagination();">Date</th> </tr>');
 		getUsers();
 	}
 	
@@ -250,9 +228,36 @@ user = {};
 							if (val == "ROLE_ADMIN")
 								str += 'checked';
 						});
-					str += '></tr>';
+					str += '></td><td><button type="button" class="btn btn-primary" onclick="setUser('+uid+')" data-toggle="modal" data-target="#changeUser"><span class="glyphicon glyphicon-pencil"></span>Edit</button></td></tr>';
 					table.append(str);
 				});
+	}
+	
+	setUser = function(uid) {
+		$.ajax({
+			url : "users/" + uid,
+			dataType : 'json',
+			type : 'get',
+			success : function(data) {				
+				$('#changeFirstname').val(data.firstName);
+				$('#changeLastname').val(data.lastName);
+				$('#changeUsername').val(data.username);
+				$('#changeEmail').val(data.email);
+				$('#changePassword').val(data.password);
+			},
+		});	
+	}
+	
+	setBleet = function(bid) {
+		$.ajax({
+			url: "users/" + userid + "/bleets/" + bid,
+			dataType: "json",
+			type: "get",
+			success: function(data) {
+				$('#changeBleet').val(data.bleet);
+				$('#changePrivateComment').attr('checked', data.privateComment);
+			}
+		});
 	}
 	
 	addUser= function(){
@@ -266,15 +271,32 @@ user = {};
 			url : "users",
 			dataType : 'json',
 			type : 'post',
-			data : { username: username, password:password, firstname:firstname, lastname:lastname, email:email, page:page },
+			data : { username: username, password:password, firstname:firstname, lastname:lastname, email:email },
 			success : function(data) {				
-				users = data;
-				updateUsers();
+				pagination();
 			},
 			failure: function(err) {
 				console.log("There is an error with updating a bleet: " + err);
 			}
 		});			
+	}
+	
+	changeUser = function(uid) {
+		username = $('#changeUsername').val();
+		password = $('#changePassword').val();
+		firstname = $('#changeFirstname').val();
+		lastname = $('#changeLastname').val();
+		email = $('#changeEmail').val();
+		$.ajax({
+			url: "users/" + uid,
+			dataType: "json",
+			type: "put",
+			data: "firstname=" + firstname + "&lastname=" + lastname + "&email=" + email + 
+			"&username=" + username + "&password=" + password,
+			success: function(data) {
+				pagination();
+			}
+		});
 	}
 	
 	clearUserForm = function(){
@@ -291,8 +313,7 @@ user = {};
 			dataType : 'json',
 			type : 'put',
 			success : function(data) {				
-				users = data;
-				updateUsers();
+				pagination();
 			},
 			failure: function(err) {
 				console.log("There is an error with updating a bleet: " + err);
@@ -319,11 +340,14 @@ user = {};
 	}
 	
 	pagination = function() {
-		if(mode == "home") {
-			searchFunc();
+		if(mode == "users") {
+			getUsers();
+		}
+		else if (mode == "usersbleets") {
+			searchUserBleets();
 		}
 		else{
-			searchFunc();
+			searchAllBleets();
 		} 
 			
 	}
@@ -348,7 +372,7 @@ user = {};
 							bleet.timestamp + '</td> <td class="blockCell" style="visibility: hidden"><input type="checkbox" onclick="blockFunc('+bid+');"';
 							if (bleet.blocked)
 								bleetStr += 'checked';
-							bleetStr += '></td></tr>';
+							bleetStr += '></td><td><button type="button" class="btn btn-primary" onclick="setBleet('+bid+')" data-toggle="modal" data-target="#changeBleet"><span class="glyphicon glyphicon-pencil"></span>Edit</button></td></tr>';
 							bleetTable.append(bleetStr);
 						});
 		if (isAdmin)
@@ -362,25 +386,16 @@ user = {};
 		}
 	}
 	
-	search = function() {
+	searchAllBleets = function() {
 		usr = $('#searchUsername').val();
 		beforeDate = $('#beforeDate').val();
 		afterDate = $('#afterDate').val();
-		if (usr || beforeDate || afterDate){
-			searchUserRange(usr, beforeDate, afterDate);
-		}
-		else {
-			getAllBleets();
-		}
-	}
-	
-	searchUserRange = function(usr, beforeDate, afterDate) {
 		if (page < 0)
 			page = 0;
 		$.ajax({
 			url : "bleets",
 			dataType : 'json',
-			data: { page: page, username:usr, before:beforeDate, after:afterDate},
+			data: { page: page, username:usr, before:beforeDate, after:afterDate, sort:sort, order: order},
 			type : 'get',
 			success : function(data) {
 				bleets = data;
@@ -389,5 +404,26 @@ user = {};
 			failure: function(jqXHR, textStatus, errorThrown) {
 				console.log("There is an error with adding a bleet: " + errorThrown);
 			}
-		});		
+		});	
 	}
+	
+	searchUserBleets = function () {
+		beforeDate = $('#beforeDate').val();
+		afterDate = $('#afterDate').val();
+		if (page < 0)
+			page = 0;
+		$.ajax({
+			url : "users/" + userid + "/bleets",
+			dataType : 'json',
+			data: { page: page, before:beforeDate, after:afterDate, sort:sort, order: order},
+			type : 'get',
+			success : function(data) {
+				bleets = data;
+				updateBleets();
+			},
+			failure: function(jqXHR, textStatus, errorThrown) {
+				console.log("There is an error with adding a bleet: " + errorThrown);
+			}
+		});	
+	}
+	

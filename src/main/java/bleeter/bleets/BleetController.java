@@ -29,9 +29,10 @@ public class BleetController {
 	@Autowired
 	private BleetServices bleetServices;
 
+	@Secured("ROLE_ADMIN")
 	@RequestMapping("/bleets")
 	@ResponseBody
-	public Page<Bleet> getBleets(
+	public Page<Bleet> getBleetsForAdmin(
 			@RequestParam(required=false, defaultValue="") String username,
 			@RequestParam(required=false, defaultValue="2999-01-01") @DateTimeFormat(pattern="yyyy-MM-dd") Date after,
 			@RequestParam(required=false, defaultValue="1000-01-01") @DateTimeFormat(pattern="yyyy-MM-dd") Date before,
@@ -50,6 +51,29 @@ public class BleetController {
 		return bleetServices.searchRangeAndUsername(before, after, username, page, s);
 	}
 	
+	@RequestMapping("/bleets")
+	@ResponseBody
+	public Page<Bleet> getBleets(
+			@RequestParam(required=false, defaultValue="") String username,
+			@RequestParam(required=false, defaultValue="2999-01-01") @DateTimeFormat(pattern="yyyy-MM-dd") Date after,
+			@RequestParam(required=false, defaultValue="1000-01-01") @DateTimeFormat(pattern="yyyy-MM-dd") Date before,
+			@RequestParam(required = false, defaultValue="0") Integer page,
+			@RequestParam(required = false, defaultValue="username") String sort,
+			@RequestParam(required = false, defaultValue="asc") String order) {
+		Sort s;
+		if (order.equals("asc")) {
+			s = new Sort(Direction.ASC, sort);
+		}
+		else {
+			s = new Sort(Direction.DESC, sort);
+		}
+		if (page < 0)
+			page = 0;
+		return bleetServices.searchRangeAndUsernameWithNotPrivateNotBlocked(before, after, username, page, s);
+	}
+	
+	
+	
 	@RequestMapping("users/{uid}")
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")		
@@ -60,14 +84,19 @@ public class BleetController {
 	@RequestMapping(value = "users/{uid}", method = RequestMethod.PUT)
 	@ResponseBody
 	@PostAuthorize(value = "principal.id == #uid")
-	public BleetUser updateUser(@PathVariable String uid, @RequestParam String firstname,
-			@RequestParam String lastname, @RequestParam String username, 
-			@RequestParam String email) {
+	public BleetUser updateUser(@PathVariable String uid,
+			@RequestBody MultiValueMap<String, String> body) {
+		String username = body.getFirst("username");
+		String firstname = body.getFirst("firstname");
+		String lastname = body.getFirst("lastname");
+		String email = body.getFirst("email");
+		String password = body.getFirst("password");
 		BleetUser user = userServices.findByUsername(uid);
 		user.setFirstName(firstname);
 		user.setLastName(lastname);
 		user.setUsername(username);
 		user.setEmail(email);
+		user.setPassword(password);
 		return userServices.updateUser(user);
 	}
 	
@@ -75,29 +104,15 @@ public class BleetController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "users/{uid}/authorities", method = RequestMethod.PUT)
 	@ResponseBody
-	public Page<BleetUser> changeAdmin(@PathVariable String uid,
-			@RequestParam(required = false, defaultValue="0") Integer page) {
-		return userServices.changeAdmin(uid, page);
+	public BleetUser changeAdmin(@PathVariable String uid) {
+		return userServices.changeAdmin(uid);
 	}
 	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "/bleets/{bid}/block", method = RequestMethod.PUT)
 	@ResponseBody
-	public Page<Bleet> changeBlock(@PathVariable String bid,
-			@RequestBody MultiValueMap<String, String> body) {
-		Integer page = Integer.parseInt(body.getFirst("page"));
-		String order = body.getFirst("order");
-		String sort = body.getFirst("sort");
-		Boolean block = Boolean.parseBoolean(body.getFirst("block"));
-		
-		Sort s;
-		if (order.equals("asc")) {
-			s = new Sort(Direction.ASC, sort);
-		}
-		else {
-			s = new Sort(Direction.DESC, sort);
-		} 
-		return bleetServices.changeBlock(bid, page, s, block);
+	public Bleet changeBlock(@PathVariable String bid) {
+		return bleetServices.changeBlock(bid);
 	}
 	
 	
@@ -128,6 +143,8 @@ public class BleetController {
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")
 	public Page<Bleet> getUsersBleets(@PathVariable String uid,
+			@RequestParam(required=false, defaultValue="2999-01-01") @DateTimeFormat(pattern="yyyy-MM-dd") Date after,
+			@RequestParam(required=false, defaultValue="1000-01-01") @DateTimeFormat(pattern="yyyy-MM-dd") Date before,
 			@RequestParam(required = false, defaultValue="0") Integer page,
 			@RequestParam(required = false, defaultValue="username") String sort,
 			@RequestParam(required = false, defaultValue="asc") String order) {
@@ -140,16 +157,16 @@ public class BleetController {
 		}
 		if (page < 0)
 			page = 0;
-		return bleetServices.findBleets(uid, page, s);
+		return bleetServices.searchRangeWithUid(before, after, uid, page, s);
 	}
 	
-	/*@Secured("ROLE_USER")
+	@Secured("ROLE_USER")
 	@RequestMapping("users/{uid}/bleets/{bid}")
 	@ResponseBody
 	@PreAuthorize(value = "principal.id == #uid")		
 	public Bleet getBleet(@PathVariable String uid, @PathVariable String bid) {
 		return bleetServices.findByBleetId(uid, bid);
-	}*/
+	}
 	
 	@Secured("ROLE_USER")
 	@RequestMapping(value = "users/{uid}/bleets/{bid}", method = RequestMethod.DELETE)

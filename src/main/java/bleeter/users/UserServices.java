@@ -61,7 +61,7 @@ public class UserServices implements UserDetailsService {
 		return userRepository.update(user);
 	}
 
-	public Page<BleetUser> changeAdmin(String uid, int page) {
+	public BleetUser changeAdmin(String uid) {
 		BleetUser user = userRepository.findOne(uid);
 		List<String> auths = user.getAuthorities();
 		boolean isAdmin = false;
@@ -73,8 +73,7 @@ public class UserServices implements UserDetailsService {
 			auths.remove("ROLE_ADMIN");
 		else
 			auths.add("ROLE_ADMIN");
-		userRepository.save(user);
-		return findAllUsers(page);
+		return userRepository.save(user);
 	}
 	
 	public Page<BleetUser> findAllUsers(int p) {

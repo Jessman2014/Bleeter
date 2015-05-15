@@ -33,7 +33,7 @@ public class BleetServices {
 	@Autowired
 	private BleetRepository bleetRepository;
 	@Autowired
-	MongoTemplate mongoTemplate;
+	private MongoTemplate mongoTemplate;
 	
 	public static final String SENTIMENT_HOST = "sentiment.vivekn.com/api/text/";
 	public static final int PAGE_SIZE = 10;
@@ -49,7 +49,12 @@ public class BleetServices {
 		Pageable page = new PageRequest(p, PAGE_SIZE, s);
 		return bleetRepository.findAll(page);
 	}
-	
+	public Bleet findByBleetId(String uid, String bid) {
+		Bleet bleet = bleetRepository.findOne(bid);
+		if(bleet != null && bleet.getUid().equals(uid))
+			return bleet;
+		return null;
+	}
 	
 	public Page<Bleet> addBleet(String uid, Bleet newBleet) {
 		readSentiment(newBleet);
@@ -115,12 +120,13 @@ public class BleetServices {
 		} 
 	}
 
-	public Page<Bleet> changeBlock(String bid, Integer page, Sort s,
-			Boolean block) {
+	public Bleet changeBlock(String bid) {
 		Bleet newBleet = bleetRepository.findOne(bid);
-		newBleet.setBlocked(block);
-		bleetRepository.save(newBleet);
-		return findAllBleets(page, s);
+		if(newBleet.isBlocked())
+			newBleet.setBlocked(false);
+		else
+			newBleet.setBlocked(true);
+		return bleetRepository.save(newBleet);
 	}
 
 	public Page<Bleet> searchRangeAndUsername (Date before, Date after, String username, int p, Sort s) {
@@ -139,7 +145,41 @@ public class BleetServices {
 		return bleets;
 	}
 
+	public Page<Bleet> searchRangeAndUsernameWithNotPrivateNotBlocked (Date before, Date after, String username, int p, Sort s) {
+		Pageable page = new PageRequest(p, PAGE_SIZE, s);
+		Query query = new Query().with(page)
+				.addCriteria(
+						Criteria.where("timestamp")
+						.gte(before)
+						.lt(after)
+						.and("username")
+						.regex(username)
+						.and("privateComment")
+						.is(false)
+						.and("blocked")
+						.is(false)
+						);
+		List<Bleet> b = mongoTemplate.find(query, Bleet.class);
+		long total = mongoTemplate.count(new Query(), Bleet.class);
+		Page<Bleet> bleets = new PageImpl<Bleet>(b, page, total);
+		return bleets;
+	}
 	
+	public Page<Bleet> searchRangeWithUid (Date before, Date after, String uid, int p, Sort s) {
+		Pageable page = new PageRequest(p, PAGE_SIZE, s);
+		Query query = new Query().with(page)
+				.addCriteria(
+						Criteria.where("timestamp")
+						.gte(before)
+						.lt(after)
+						.and("username")
+						.is(uid)
+						);
+		List<Bleet> b = mongoTemplate.find(query, Bleet.class);
+		long total = mongoTemplate.count(new Query(), Bleet.class);
+		Page<Bleet> bleets = new PageImpl<Bleet>(b, page, total);
+		return bleets;
+	}
 	
 	
 	

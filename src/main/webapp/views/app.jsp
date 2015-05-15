@@ -44,24 +44,9 @@
 			    </ul>
 	        </div>
 			<div class="col-md-10">
-				<div class="row" id="addBleets">
-					<div class="col-md-2"></div>
-					<div class="col-md-10 form-inline" >
-						<div class="form-group">
-							<label for="bleet">Bleet description</label>
-							<input type="text" class="input-lg" id="bleet">
-						</div>
-						<div class="form-group">
-							<label for="privateComment">Make comment private?</label>
-							<input type="checkbox" id="privateComment">
-						</div>
-						<div class="btn btn-sm btn-primary" onclick="addBleet()">Add bleet</div>
-						
-					</div>
-				</div>
 				<div class="table-responsive">
 					<table class="table table-hover" id="bleetTable">
-						<tr id="headerRow"> <th onclick="sort='username'; flipOrder(); getAllBleets();" >Username</th> <th>Bleet</th> <th onclick="sort='timestamp'; flipOrder(); getAllBleets();">Date</th> </tr>
+						<tr id="headerRow"> <th onclick="sort='username'; flipOrder(); pagination();" >Username</th> <th>Bleet</th> <th onclick="sort='timestamp'; flipOrder(); pagination();">Date</th> </tr>
 					</table>
 				</div>
 				
@@ -72,17 +57,63 @@
 		        	<span class="glyphicon glyphicon-search" onclick="search();"></span>
 		        </form>
 				<!-- Button trigger modal -->
-				<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
-				  Launch demo modal
+				<button type="button" id="newUserButton" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newUser">
+				  Create New User
+				</button>
+				<button type="button" id="newBleetButton" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newBleet">
+				  Create New Bleet
 				</button>
 				
-				<!-- Modal -->
-				<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				<div class="modal fade" id="changeUser" tabindex="-1" role="dialog" aria-labelledby="changeUserLabel" aria-hidden="true">
 				  <div class="modal-dialog">
 				    <div class="modal-content">
 				      <div class="modal-header">
 				        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+				        <h4 class="modal-title" id="changeUserLabel">Modal title</h4>
+				      </div>
+				      <div class="modal-body">
+				      	<form>
+				      		<div class="form-group">
+				      			<label for="changeFirstname">Firstname</label>
+				      			<input type="text" id="changeFirstname">
+				      		</div>
+				      		<div class="form-group">
+				      			<label for="changeLastname">Lastname</label>
+				      			<input type="text" id="changeLastname">
+				      		</div>
+				      		<div class="form-group">
+				      			<label for="changeUsername">Username</label>
+				      			<input type="text" id="changeUsername">
+				      		</div>
+				      		<div class="form-group">
+				      			<label for="changeEmail">Email</label>
+				      			<input type="email" id="changeEmail">
+				      		</div>
+				      		<div class="form-group">
+					      		<label for="changePassword">Password</label>
+					      		<input type="password" id="changePassword">
+					      	</div>
+					      	<div class="form-group">
+				      			<label for="changeAvatar">Change Avatar</label>
+				      			<input type="file" id="changeAvatar" name="avatar">
+				      		</div>
+					      	<div class="btn btn-primary" onclick="changeUser(); addAvatar();">Submit</div>
+				      	</form>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				        <button type="button" class="btn btn-primary">Save changes</button>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+				
+				<div class="modal fade" id="newUser" tabindex="-1" role="dialog" aria-labelledby="newUserLabel" aria-hidden="true">
+				  <div class="modal-dialog">
+				    <div class="modal-content">
+				      <div class="modal-header">
+				        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				        <h4 class="modal-title" id="newUserLabel">Modal title</h4>
 				      </div>
 				      <div class="modal-body">
 				      	<form>
@@ -106,7 +137,67 @@
 					      		<label for="password">Password</label>
 					      		<input type="password" id="password">
 					      	</div>
-					      	<div class="btn btn-primary" >Add user</div>
+					      	<div class="form-group">
+				      			<label for="avatar">Change Avatar</label>
+				      			<input type="file" id="avatar" name="avatar">
+				      		</div>
+					      	<div class="btn btn-primary" onclick="addUser(); addAvatar();">Submit</div>
+				      	</form>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				        <button type="button" class="btn btn-primary">Save changes</button>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+				
+				<div class="modal fade" id="changeBleet" tabindex="-1" role="dialog" aria-labelledby="changeBleetLabel" aria-hidden="true">
+				  <div class="modal-dialog">
+				    <div class="modal-content">
+				      <div class="modal-header">
+				        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				        <h4 class="modal-title" id="changeBleetLabel">Modal title</h4>
+				      </div>
+				      <div class="modal-body">
+				      	<form>
+				      		<div class="form-group">
+								<label for="bleet">Bleet description</label>
+								<input type="text" class="input-lg" id="changeBleet">
+							</div>
+							<div class="form-group">
+								<label for="privateComment">Make comment private?</label>
+								<input type="checkbox" id="changePprivateComment">
+							</div>
+					      	<div class="btn btn-primary" onclick="changeBleet();">Submit</div>
+				      	</form>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				        <button type="button" class="btn btn-primary">Save changes</button>
+				      </div>
+				    </div>
+				  </div>
+				</div>
+				
+				<div class="modal fade" id="newBleet" tabindex="-1" role="dialog" aria-labelledby="newBleetLabel" aria-hidden="true">
+				  <div class="modal-dialog">
+				    <div class="modal-content">
+				      <div class="modal-header">
+				        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				        <h4 class="modal-title" id="newBleetLabel">Modal title</h4>
+				      </div>
+				      <div class="modal-body">
+				      	<form>
+				      		<div class="form-group">
+								<label for="bleet">Bleet description</label>
+								<input type="text" class="input-lg" id="bleet">
+							</div>
+							<div class="form-group">
+								<label for="privateComment">Make comment private?</label>
+								<input type="checkbox" id="privateComment">
+							</div>
+					      	<div class="btn btn-primary" onclick="addBleet();">Submit</div>
 				      	</form>
 				      </div>
 				      <div class="modal-footer">
