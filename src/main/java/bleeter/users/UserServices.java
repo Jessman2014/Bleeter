@@ -31,12 +31,11 @@ public class UserServices implements UserDetailsService {
 		return userRepository.findByUsername(username);
 	}
 
-	public Page<BleetUser> createUser(BleetUser newUser, int page) {
+	public BleetUser createUser(BleetUser newUser, int page) {
 		List<String> authorities = new ArrayList<String>();
 		authorities.add("ROLE_USER");
 		newUser.setAuthorities(authorities);
-		userRepository.insert(newUser);
-		return findAllUsers(page);
+		return userRepository.insert(newUser);
 	}
 
 	@Override
@@ -65,14 +64,20 @@ public class UserServices implements UserDetailsService {
 		BleetUser user = userRepository.findOne(uid);
 		List<String> auths = user.getAuthorities();
 		boolean isAdmin = false;
-		for (String auth : auths) {
-			if (auth.equals("ROLE_ADMIN"))
-				isAdmin = true;
+		if(auths != null) {
+			for (String auth : auths) {
+				if (auth.equals("ROLE_ADMIN"))
+					isAdmin = true;
+			}
+		}
+		else {
+			auths = new ArrayList<String>();
 		}
 		if(isAdmin)
 			auths.remove("ROLE_ADMIN");
 		else
 			auths.add("ROLE_ADMIN");
+		user.setAuthorities(auths);
 		return userRepository.save(user);
 	}
 	

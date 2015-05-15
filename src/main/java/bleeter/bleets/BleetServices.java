@@ -56,10 +56,9 @@ public class BleetServices {
 		return null;
 	}
 	
-	public Page<Bleet> addBleet(String uid, Bleet newBleet) {
+	public Bleet addBleet(String uid, Bleet newBleet) {
 		readSentiment(newBleet);
-		bleetRepository.insert(newBleet);
-		return findAllBleets(DEFAULT_PAGE, DEFAULT_SORT);
+		return bleetRepository.insert(newBleet);
 	}
 	
 	public Page<Bleet> deleteBleet(String uid, String bid) {
@@ -67,14 +66,14 @@ public class BleetServices {
 		return findBleets(uid, DEFAULT_PAGE, DEFAULT_SORT);
 	}
 
-	public Page<Bleet> updateBleet(String uid, String bid, String bleet,
+	public Bleet updateBleet(String uid, String bid, String bleet,
 			Boolean privatecomment) {
 		Bleet newBleet = bleetRepository.findOne(bid);
 		readSentiment(newBleet);
 		newBleet.setBleet(bleet);
 		newBleet.setPrivateComment(privatecomment);
-		bleetRepository.save(newBleet);
-		return findBleets(uid, DEFAULT_PAGE, DEFAULT_SORT);
+		newBleet.setTimestamp(new Date());
+		return bleetRepository.save(newBleet);
 	}
 	
 	private void readSentiment (Bleet bleet) {
@@ -172,7 +171,7 @@ public class BleetServices {
 						Criteria.where("timestamp")
 						.gte(before)
 						.lt(after)
-						.and("username")
+						.and("uid")
 						.is(uid)
 						);
 		List<Bleet> b = mongoTemplate.find(query, Bleet.class);

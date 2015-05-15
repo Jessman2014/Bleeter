@@ -4,6 +4,7 @@ package bleeter.users.avatar;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +43,17 @@ public class AvatarController {
 		} else {
 			return user;
 		}
-		
+	}
+	
+	@Secured("ROLE_ADMIN")
+	@RequestMapping(value="/{uid}/avatar/admin", method=RequestMethod.POST)
+	@ResponseBody
+	public BleetUser uploadAvatarForAdmin(@PathVariable String uid, @RequestParam("avatar") MultipartFile file) throws IllegalStateException, IOException {
+		BleetUser user = userServices.findById(uid);
+		if(!file.isEmpty()) {
+			return avatarServices.uploadAvatar(user, file);
+		} else {
+			return user;
+		}
 	}
 }

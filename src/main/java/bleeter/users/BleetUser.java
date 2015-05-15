@@ -19,7 +19,7 @@ public class BleetUser {
 	private String username;
 	private String email;
 	private String avatar;
-	private List<String> favorites;
+	private String favorites;
 	private List<String> authorities;
 	
 	@JsonIgnore
@@ -28,7 +28,7 @@ public class BleetUser {
 	@PersistenceConstructor
 	public BleetUser(String id, String firstName, String lastName,
 			String username, String email, String avatar,
-			List<String> favorites,
+			String favorites,
 			List<String> authorities, String password) {
 		super();
 		this.id = id;
@@ -90,11 +90,11 @@ public class BleetUser {
 		this.avatar = avatar;
 	}
 
-	public List<String> getFavorites() {
+	public String getFavorites() {
 		return favorites;
 	}
 
-	public void setFavorites(List<String> favorites) {
+	public void setFavorites(String favorites) {
 		this.favorites = favorites;
 	}
 	public List<String> getAuthorities() {
@@ -131,7 +131,7 @@ public class BleetUser {
 		private String username;
 		private String email;
 		private String avatar;
-		private List<String> favorites;
+		private String favorites;
 		private List<String> authorities;
 		private String password;
 		
@@ -165,7 +165,7 @@ public class BleetUser {
 			return this;
 		}
 		
-		public Builder favorites(List<String> favorites) {
+		public Builder favorites(String favorites) {
 			this.favorites = favorites;
 			return this;
 		}

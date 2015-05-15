@@ -40,7 +40,7 @@
 	        <div class="col-md-2">
 			    <ul class="nav nav-sidebar">
 			      <li class="avatar-circle"><img src="users/${user.id}/avatar" id="avatarImage" class="avatar"></li>
-			      <li><h3 id="userid">${user.username}<span class="glyphicon glyphicon-pencil"></span></h3></li>
+			      <li><h3 id="username">${user.username}</h3><button id="userEditButton" type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#changeUser"><span class="glyphicon glyphicon-pencil"></span>Edit</button></li>
 			    </ul>
 	        </div>
 			<div class="col-md-10">
@@ -50,11 +50,11 @@
 					</table>
 				</div>
 				
-				<form class="navbar-form navbar-right">
+				<form class="navbar-form navbar-right" id="searchBar">
 		        	<input type="text" id="searchUsername" class="form-control" placeholder="Search Usernames...">
 		        	<input type="date" id="beforeDate" class="form-control" placeholder="Before Date...">
 		        	<input type="date" id="afterDate" class="form-control" placeholder="After Date...">
-		        	<span class="glyphicon glyphicon-search" onclick="search();"></span>
+		        	<span class="glyphicon glyphicon-search" onclick="pagination();"></span>
 		        </form>
 				<!-- Button trigger modal -->
 				<button type="button" id="newUserButton" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newUser">
@@ -69,7 +69,7 @@
 				    <div class="modal-content">
 				      <div class="modal-header">
 				        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				        <h4 class="modal-title" id="changeUserLabel">Modal title</h4>
+				        <h4 class="modal-title" id="changeUserLabel">Change User</h4>
 				      </div>
 				      <div class="modal-body">
 				      	<form>
@@ -90,19 +90,19 @@
 				      			<input type="email" id="changeEmail">
 				      		</div>
 				      		<div class="form-group">
-					      		<label for="changePassword">Password</label>
-					      		<input type="password" id="changePassword">
-					      	</div>
+				      			<label for="changeFavorites">Favorites (separated with commas)</label>
+				      			<input type="text" id="changeFavorites">
+				      		</div>
 					      	<div class="form-group">
 				      			<label for="changeAvatar">Change Avatar</label>
 				      			<input type="file" id="changeAvatar" name="avatar">
 				      		</div>
-					      	<div class="btn btn-primary" onclick="changeUser(); addAvatar();">Submit</div>
+				      		<input type="hidden" id="changeUid">
+					      	<div class="btn btn-primary" data-dismiss="modal" onclick="changeUser(); changeAvatar();">Submit</div>
 				      	</form>
 				      </div>
 				      <div class="modal-footer">
 				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				        <button type="button" class="btn btn-primary">Save changes</button>
 				      </div>
 				    </div>
 				  </div>
@@ -113,7 +113,7 @@
 				    <div class="modal-content">
 				      <div class="modal-header">
 				        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				        <h4 class="modal-title" id="newUserLabel">Modal title</h4>
+				        <h4 class="modal-title" id="newUserLabel">Add User</h4>
 				      </div>
 				      <div class="modal-body">
 				      	<form>
@@ -137,16 +137,20 @@
 					      		<label for="password">Password</label>
 					      		<input type="password" id="password">
 					      	</div>
+				      		<div class="form-group">
+				      			<label for="favorites">Favorites (separated with commas)</label>
+				      			<input type="text" id="favorites">
+				      		</div>
 					      	<div class="form-group">
 				      			<label for="avatar">Change Avatar</label>
 				      			<input type="file" id="avatar" name="avatar">
 				      		</div>
-					      	<div class="btn btn-primary" onclick="addUser(); addAvatar();">Submit</div>
+				      		<input type="hidden" id="newUid">
+					      	<div class="btn btn-primary" data-dismiss="modal" onclick="addUser(); addAvatar();">Submit</div>
 				      	</form>
 				      </div>
 				      <div class="modal-footer">
 				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				        <button type="button" class="btn btn-primary">Save changes</button>
 				      </div>
 				    </div>
 				  </div>
@@ -157,24 +161,24 @@
 				    <div class="modal-content">
 				      <div class="modal-header">
 				        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				        <h4 class="modal-title" id="changeBleetLabel">Modal title</h4>
+				        <h4 class="modal-title" id="changeBleetLabel">Change Bleet</h4>
 				      </div>
 				      <div class="modal-body">
 				      	<form>
 				      		<div class="form-group">
-								<label for="bleet">Bleet description</label>
-								<input type="text" class="input-lg" id="changeBleet">
+								<label for="changeBleetText">Bleet description (Less than 140 characters)</label>
+								<textarea rows="3" class="form-control" id="changeBleetText"></textarea>
 							</div>
 							<div class="form-group">
-								<label for="privateComment">Make comment private?</label>
-								<input type="checkbox" id="changePprivateComment">
+								<label for="changePrivateComment">Make comment private?</label>
+								<input type="checkbox" id="changePrivateComment">
 							</div>
-					      	<div class="btn btn-primary" onclick="changeBleet();">Submit</div>
+							<input type="hidden" id="changeBid">
+					      	<div class="btn btn-primary" data-dismiss="modal" onclick="changeBleet();">Submit</div>
 				      	</form>
 				      </div>
 				      <div class="modal-footer">
 				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				        <button type="button" class="btn btn-primary">Save changes</button>
 				      </div>
 				    </div>
 				  </div>
@@ -185,24 +189,23 @@
 				    <div class="modal-content">
 				      <div class="modal-header">
 				        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				        <h4 class="modal-title" id="newBleetLabel">Modal title</h4>
+				        <h4 class="modal-title" id="newBleetLabel">Add Bleet</h4>
 				      </div>
 				      <div class="modal-body">
 				      	<form>
 				      		<div class="form-group">
-								<label for="bleet">Bleet description</label>
-								<input type="text" class="input-lg" id="bleet">
+								<label for="bleet">Bleet description (Less than 140 characters)</label>
+								<textarea rows="3" class="form-control" id="bleet"></textarea>
 							</div>
 							<div class="form-group">
 								<label for="privateComment">Make comment private?</label>
 								<input type="checkbox" id="privateComment">
 							</div>
-					      	<div class="btn btn-primary" onclick="addBleet();">Submit</div>
+					      	<div class="btn btn-primary" data-dismiss="modal" onclick="addBleet();">Submit</div>
 				      	</form>
 				      </div>
 				      <div class="modal-footer">
 				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				        <button type="button" class="btn btn-primary">Save changes</button>
 				      </div>
 				    </div>
 				  </div>

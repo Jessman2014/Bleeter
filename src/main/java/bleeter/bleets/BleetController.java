@@ -30,7 +30,7 @@ public class BleetController {
 	private BleetServices bleetServices;
 
 	@Secured("ROLE_ADMIN")
-	@RequestMapping("/bleets")
+	@RequestMapping("/bleets/admin")
 	@ResponseBody
 	public Page<Bleet> getBleetsForAdmin(
 			@RequestParam(required=false, defaultValue="") String username,
@@ -90,13 +90,39 @@ public class BleetController {
 		String firstname = body.getFirst("firstname");
 		String lastname = body.getFirst("lastname");
 		String email = body.getFirst("email");
-		String password = body.getFirst("password");
-		BleetUser user = userServices.findByUsername(uid);
+		String favorites = body.getFirst("favorites");
+		BleetUser user = userServices.findById(uid);
 		user.setFirstName(firstname);
 		user.setLastName(lastname);
 		user.setUsername(username);
 		user.setEmail(email);
-		user.setPassword(password);
+		user.setFavorites(favorites);
+		return userServices.updateUser(user);
+	}
+	
+	@Secured("ROLE_ADMIN")
+	@RequestMapping("users/{uid}/admin")
+	@ResponseBody
+	public BleetUser getUserForAdmin(@PathVariable String uid) {
+		return userServices.findById(uid);
+	}
+	
+	@Secured("ROLE_ADMIN")
+	@RequestMapping(value = "users/{uid}/admin", method = RequestMethod.PUT)
+	@ResponseBody
+	public BleetUser updateUserForAdmin(@PathVariable String uid,
+			@RequestBody MultiValueMap<String, String> body) {
+		String username = body.getFirst("username");
+		String firstname = body.getFirst("firstname");
+		String lastname = body.getFirst("lastname");
+		String email = body.getFirst("email");
+		String favorites = body.getFirst("favorites");
+		BleetUser user = userServices.findById(uid);
+		user.setFirstName(firstname);
+		user.setLastName(lastname);
+		user.setUsername(username);
+		user.setEmail(email);
+		user.setFavorites(favorites);
 		return userServices.updateUser(user);
 	}
 	
@@ -119,14 +145,15 @@ public class BleetController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "users", method = RequestMethod.POST)
 	@ResponseBody
-	public Page<BleetUser> createUser(@RequestParam String username,
+	public BleetUser createUser(@RequestParam String username,
 			@RequestParam String password,
 			@RequestParam String firstname,
 			@RequestParam String lastname,
 			@RequestParam String email,
+			@RequestParam(required = false, defaultValue="") String favorites,
 			@RequestParam(required = false, defaultValue="0") Integer page) {
 		BleetUser newUser = new BleetUser.Builder().username(username).password(password)
-				.firstName(firstname).lastName(lastname).email(email).build();
+				.firstName(firstname).lastName(lastname).email(email).favorites(favorites).build();
 		return userServices.createUser(newUser, page);
 	}
 
@@ -180,23 +207,31 @@ public class BleetController {
 	@RequestMapping(value = "users/{uid}/bleets", method = RequestMethod.POST)
 	@ResponseBody
 	@PostAuthorize(value = "principal.id == #uid")		
-	public Page<Bleet> createBleet(@PathVariable String uid,
+	public Bleet createBleet(@PathVariable String uid,
 			@RequestParam String bleet,
 			@RequestParam Boolean privatecomment) {
-		BleetUser user = userServices.findById(uid);
-		Bleet newBleet = new Bleet.Builder().bleet(bleet).privateComment(privatecomment)
-				.uid(uid).username(user.getUsername()).sentiment("").timestamp(new Date())
-				.confidence(0).build();
-		return bleetServices.addBleet(uid, newBleet);
+		if (bleet.length() <= 140) {
+			BleetUser user = userServices.findById(uid);
+			Bleet newBleet = new Bleet.Builder().bleet(bleet).privateComment(privatecomment)
+					.uid(uid).username(user.getUsername()).sentiment("").timestamp(new Date())
+					.confidence(0).build();
+			return bleetServices.addBleet(uid, newBleet);
+		}
+		return null;
 	}
 	
 	@Secured("ROLE_USER")
 	@RequestMapping(value = "users/{uid}/bleets/{bid}", method = RequestMethod.PUT)
 	@ResponseBody
 	@PostAuthorize(value = "principal.id == #uid")
-	public Page<Bleet> updateBleet(@PathVariable String uid, @PathVariable String bid,
-			@RequestParam String bleet, @RequestParam Boolean privatecomment){
-		return bleetServices.updateBleet(uid, bid, bleet, privatecomment);
+	public Bleet updateBleet(@PathVariable String uid, @PathVariable String bid,
+			@RequestBody MultiValueMap<String, String> body){
+		String bleet = body.getFirst("bleet");
+		Boolean privatecomment = Boolean.parseBoolean(body.getFirst("privateComment"));
+		if (bleet.length() <= 140) {
+			return bleetServices.updateBleet(uid, bid, bleet, privatecomment);
+		}
+		return null;
 	}
 	
 }

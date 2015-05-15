@@ -14,13 +14,13 @@ public class UserRepositoryImpl implements UpdateableUserRepository {
 		
 	private Update getUpdate(BleetUser x, BleetUser y) {
 		Update update = new Update();
-		update.set("firstName", y.getUsername());
-		update.set("lastName", y.getPassword());
+		update.set("firstName", y.getFirstName());
+		update.set("lastName", y.getLastName());
 		update.set("email", y.getEmail());
 		update.set("avatar", y.getAvatar());
 		update.set("favorites", y.getFavorites());
 		update.set("authorities", y.getAuthorities());
-		//update.set("username", y.getUsername());
+		update.set("username", y.getUsername());
 		return update;
 	}
 	

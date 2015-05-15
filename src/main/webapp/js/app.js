@@ -14,6 +14,7 @@
 	userid= "";
 	$(document).ready(function() {
 		userid = $('#userid').html();
+		$('#userEditButton').click(setUser(userid));
 		$('#newUserButton').hide();
 		getUser();
 		$('#changeUser').on('show.bs.modal', function (event) {
@@ -37,7 +38,7 @@
 	layoutUser = function() {
 		
 		$('.navbar-header')
-			.append('<a class="navbar-brand" href="#" onclick="layoutUserBleets()"><span class="glyphicon glyphicon-tasks"></span>My Bleets</a>');
+			.append('<a class="navbar-brand" href="#" onclick="layoutUsersBleets()"><span class="glyphicon glyphicon-tasks"></span>My Bleets</a>');
 	}
 	
 	layoutAdmin = function() {
@@ -104,7 +105,7 @@
 			success : function(data) {				
 				user = data;
 				authority();
-				getAllBleets();
+				searchAllBleets();
 			},
 			failure: function(err) {
 				console.log("There is an error with retrieving user: " + err);
@@ -130,15 +131,15 @@
 		});					
 	}
 
-	changeBleet = function(id) {		
-		bleet = $('#bleet').val();
+	changeBleet = function() {		
+		bleet = $('#changeBleetText').val();
 		checked = $('#changePrivateComment:checked').length === 1;
-		clearForm();			
+		id = $('#changeBid').val();
 		$.ajax({
-			url : "users/" + userid + "/bleets" + id,
+			url : "users/" + userid + "/bleets/" + id,
 			dataType : 'json',
 			type : 'put',
-			data : { bleet : bleet, privateComment : checked },
+			data : "bleet=" + bleet + "&privateComment=" + checked ,
 			success : function(data) {				
 				pagination();
 			},
@@ -148,29 +149,75 @@
 		});					
 	}
 
-	addAvatar = function() {
-		imageFile = document.getElementById('avatar').files[0];
-		var data = new FormData();
-		data.append('avatar', imageFile);
-		$('#avatar').replaceWith( $('#avatar').clone(true) );
-		
-		$.ajax({
-			url : 'users/' + userid + '/avatar',
-			type : 'POST',
-			data : data,
-			cache : false,
-			dataType : 'text',
-			processData : false, 
-			contentType : false, 
-			success : function(data, textStatus, jqXHR) {
-				d = new Date();
-				var src = $("#avatarImage").attr("src");
-				$('#avatarImage').attr('src', src + '?' + d.getTime());
-			},
-			error : function(jqXHR, textStatus, errorThrown) {
-				console.log('ERRORS: ' + textStatus);
+	changeAvatar = function() {
+		imageFile = document.getElementById('changeAvatar').files[0];
+		if(imageFile) {
+			var data = new FormData();
+			data.append('avatar', imageFile);
+			$('#avatar').replaceWith( $('#avatar').clone(true) );
+			uid = $('#changeUid').val();
+			if(uid == userid) {
+				$.ajax({
+					url : 'users/' + uid + '/avatar',
+					type : 'POST',
+					data : data,
+					cache : false,
+					dataType : 'text',
+					processData : false, 
+					contentType : false, 
+					success : function(data, textStatus, jqXHR) {
+						d = new Date();
+						var src = $("#avatarImage").attr("src");
+						$('#avatarImage').attr('src', src + '?' + d.getTime());
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						console.log('ERRORS: ' + textStatus);
+					}
+				});
 			}
-		});
+			else {
+				$.ajax({
+					url : 'users/' + uid + '/avatar/admin',
+					type : 'POST',
+					data : data,
+					cache : false,
+					dataType : 'text',
+					processData : false, 
+					contentType : false, 
+					success : function(data, textStatus, jqXHR) {
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						console.log('ERRORS: ' + textStatus);
+					}
+				});
+			}
+		}
+	}
+	
+	
+	addAvatar = function() {
+		
+		imageFile = document.getElementById('avatar').files[0];
+		if(imageFile) {
+			var data = new FormData();
+			data.append('avatar', imageFile);
+			$('#avatar').replaceWith( $('#avatar').clone(true) );
+			uid = $('#newUid').val();
+				$.ajax({
+					url : 'users/' + uid + '/avatar/admin',
+					type : 'POST',
+					data : data,
+					cache : false,
+					dataType : 'text',
+					processData : false, 
+					contentType : false, 
+					success : function(data, textStatus, jqXHR) {
+					},
+					error : function(jqXHR, textStatus, errorThrown) {
+						console.log('ERRORS: ' + textStatus);
+					}
+				});
+		}
 					
 	}
 
@@ -193,6 +240,7 @@
 		mode = "users";
 		$('#newUserButton').show();
 		$('#newBleetButton').hide();
+		$('#searchBar').hide();
 		resetPage();
 		$('tr').remove();
 		table = $('table');
@@ -204,12 +252,15 @@
 		mode = "usersbleets";
 		$('#newUserButton').hide();
 		$('#newBleetButton').show();
+		$('#searchBar').show();
+		$('#searchUsername').hide();
 		resetPage();
 		$('tr').remove();
 		table = $('table');
 		table.append('<tr id="headerRow"> <th onclick="flipOrder(username); pagination();" >Username</th>'+
 				' <th>Bleet</th> <th onclick="flipOrder(timestamp); pagination();">Date</th> </tr>');
-		getUsers();
+		searchUserBleets();
+		$('.deleteBleet').show();
 	}
 	
 	updateUsers = function() {
@@ -234,18 +285,36 @@
 	}
 	
 	setUser = function(uid) {
-		$.ajax({
-			url : "users/" + uid,
-			dataType : 'json',
-			type : 'get',
-			success : function(data) {				
-				$('#changeFirstname').val(data.firstName);
-				$('#changeLastname').val(data.lastName);
-				$('#changeUsername').val(data.username);
-				$('#changeEmail').val(data.email);
-				$('#changePassword').val(data.password);
-			},
-		});	
+		if(uid == userid) {
+			$.ajax({
+				url : "users/" + uid,
+				dataType : 'json',
+				type : 'get',
+				success : function(data) {				
+					$('#changeFirstname').val(data.firstName);
+					$('#changeLastname').val(data.lastName);
+					$('#changeUsername').val(data.username);
+					$('#changeEmail').val(data.email);
+					$('#changeUid').val(data.id);
+					$('#changeFavorites').val(data.favorites);
+				},
+			});	
+		}
+		else {
+			$.ajax({
+				url : "users/" + uid + "/admin",
+				dataType : 'json',
+				type : 'get',
+				success : function(data) {				
+					$('#changeFirstname').val(data.firstName);
+					$('#changeLastname').val(data.lastName);
+					$('#changeUsername').val(data.username);
+					$('#changeEmail').val(data.email);
+					$('#changeUid').val(data.id);
+					$('#changeFavorites').val(data.favorites);
+				},
+			});	
+		}
 	}
 	
 	setBleet = function(bid) {
@@ -254,8 +323,9 @@
 			dataType: "json",
 			type: "get",
 			success: function(data) {
-				$('#changeBleet').val(data.bleet);
+				$('#changeBleetText').val(data.bleet);
 				$('#changePrivateComment').attr('checked', data.privateComment);
+				$('#changeBid').val(data.id);
 			}
 		});
 	}
@@ -266,13 +336,16 @@
 		firstname = $('#firstname').val();
 		lastname = $('#lastname').val();
 		email = $('#email').val();
+		favorites = $('#favorites').val();
 		clearUserForm();			
 		$.ajax({
 			url : "users",
 			dataType : 'json',
 			type : 'post',
-			data : { username: username, password:password, firstname:firstname, lastname:lastname, email:email },
+			data : { username: username, password:password, firstname:firstname, lastname:lastname, email:email, favorites:favorites },
 			success : function(data) {				
+				$('#newUid').val(data.id);
+				addAvatar();
 				pagination();
 			},
 			failure: function(err) {
@@ -281,27 +354,43 @@
 		});			
 	}
 	
-	changeUser = function(uid) {
+	changeUser = function() {
 		username = $('#changeUsername').val();
-		password = $('#changePassword').val();
 		firstname = $('#changeFirstname').val();
 		lastname = $('#changeLastname').val();
 		email = $('#changeEmail').val();
-		$.ajax({
-			url: "users/" + uid,
-			dataType: "json",
-			type: "put",
-			data: "firstname=" + firstname + "&lastname=" + lastname + "&email=" + email + 
-			"&username=" + username + "&password=" + password,
-			success: function(data) {
-				pagination();
-			}
-		});
+		favorites = $('#changeFavorites').val();
+		uid = $('#changeUid').val();
+		if(uid == userid) {
+			$.ajax({
+				url: "users/" + uid,
+				dataType: "json",
+				type: "put",
+				data: "firstname=" + firstname + "&lastname=" + lastname + "&email=" + email + 
+				"&username=" + username + "&favorites=" + favorites,
+				success: function(data) {
+					pagination();
+				}
+			});
+		}
+		else {
+			$.ajax({
+				url: "users/" + uid + "/admin",
+				dataType: "json",
+				type: "put",
+				data: "firstname=" + firstname + "&lastname=" + lastname + "&email=" + email + 
+				"&username=" + username + "&favorites=" + favorites,
+				success: function(data) {
+					pagination();
+				}
+			});
+		}
 	}
 	
 	clearUserForm = function(){
 		$('#username').val("");
 		$('#password').val("");
+		$('#favorites').val("");
 		$('#firstname').val("");
 		$('#lastname').val("");
 		$('#email').val("");
@@ -372,11 +461,29 @@
 							bleet.timestamp + '</td> <td class="blockCell" style="visibility: hidden"><input type="checkbox" onclick="blockFunc('+bid+');"';
 							if (bleet.blocked)
 								bleetStr += 'checked';
-							bleetStr += '></td><td><button type="button" class="btn btn-primary" onclick="setBleet('+bid+')" data-toggle="modal" data-target="#changeBleet"><span class="glyphicon glyphicon-pencil"></span>Edit</button></td></tr>';
+							bleetStr += '></td><td class="deleteBleet"><button type="button" class="btn btn-warning" onclick="deleteBleet('+bid+
+							')">Delete</button></td><td><button type="button" class="btn btn-primary" onclick="setBleet('+bid+
+							')" data-toggle="modal" data-target="#changeBleet"><span class="glyphicon glyphicon-pencil"></span>Edit</button></td></tr>';
 							bleetTable.append(bleetStr);
 						});
 		if (isAdmin)
 			layoutAdminBleets();
+		if(mode == "home")
+			$('.deleteBleet').hide();
+	}
+	
+	deleteBleet = function(bid) {
+		$.ajax({
+			url : "users/" + userid + "/bleets/" + bid,
+			dataType : 'json',
+			type : 'delete',
+			success : function(data) {				
+				pagination();
+			},
+			failure: function(err) {
+				console.log("There is an error with retrieving user: " + err);
+			}
+		});	
 	}
 	
 	calcPages = function() {
@@ -392,19 +499,36 @@
 		afterDate = $('#afterDate').val();
 		if (page < 0)
 			page = 0;
-		$.ajax({
-			url : "bleets",
-			dataType : 'json',
-			data: { page: page, username:usr, before:beforeDate, after:afterDate, sort:sort, order: order},
-			type : 'get',
-			success : function(data) {
-				bleets = data;
-				updateBleets();
-			},
-			failure: function(jqXHR, textStatus, errorThrown) {
-				console.log("There is an error with adding a bleet: " + errorThrown);
-			}
-		});	
+		if(isAdmin) {
+			$.ajax({
+				url : "bleets/admin",
+				dataType : 'json',
+				data: { page: page, username:usr, before:beforeDate, after:afterDate, sort:sort, order: order},
+				type : 'get',
+				success : function(data) {
+					bleets = data;
+					updateBleets();
+				},
+				failure: function(jqXHR, textStatus, errorThrown) {
+					console.log("There is an error with adding a bleet: " + errorThrown);
+				}
+			});	
+		}
+		else {
+			$.ajax({
+				url : "bleets",
+				dataType : 'json',
+				data: { page: page, username:usr, before:beforeDate, after:afterDate, sort:sort, order: order},
+				type : 'get',
+				success : function(data) {
+					bleets = data;
+					updateBleets();
+				},
+				failure: function(jqXHR, textStatus, errorThrown) {
+					console.log("There is an error with adding a bleet: " + errorThrown);
+				}
+			});	
+		}
 	}
 	
 	searchUserBleets = function () {
